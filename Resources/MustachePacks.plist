@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>version</key>
+	<integer>1</integer>
+	<key>packs</key>
+	<array>
+		<dict>
+			<key>name</key>
+			<string>Free mustaches</string>
+			<key>path</key>
+			<string>free</string>
+			<key>IAP_id</key>
+			<string></string>
+			<key>bought</key>
+			<true/>
+			<key>visible</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Ugly pack</string>
+			<key>path</key>
+			<string>ugly</string>
+			<key>IAP_id</key>
+			<string></string>
+			<key>bought</key>
+			<true/>
+			<key>visible</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Costume pack</string>
+			<key>path</key>
+			<string>costume</string>
+			<key>IAP_id</key>
+			<string>com.brightnewt.mustachebash.costume_pack</string>
+			<key>bought</key>
+			<false/>
+			<key>visible</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Tennessee pack</string>
+			<key>path</key>
+			<string>tennessee</string>
+			<key>IAP_id</key>
+			<string>com.brightnewt.mustachebash.tennessee_pack</string>
+			<key>bought</key>
+			<false/>
+			<key>visible</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Celebrity pack</string>
+			<key>path</key>
+			<string>celebrity</string>
+			<key>IAP_id</key>
+			<string>com.brightnewt.mustachebash.celebrity_pack</string>
+			<key>bought</key>
+			<false/>
+			<key>visible</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Comic Book pack</string>
+			<key>path</key>
+			<string>comic book</string>
+			<key>IAP_id</key>
+			<string>com.brightnewt.mustachebash.comic_book_pack</string>
+			<key>bought</key>
+			<false/>
+			<key>visible</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Da Vinci pack</string>
+			<key>path</key>
+			<string>da vinci</string>
+			<key>IAP_id</key>
+			<string>com.brightnewt.mustachebash.da_vinci_pack</string>
+			<key>bought</key>
+			<false/>
+			<key>visible</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Solid Gold pack</string>
+			<key>path</key>
+			<string>solid</string>
+			<key>IAP_id</key>
+			<string>com.brightnewt.mustachebash.solid_gold_pack</string>
+			<key>bought</key>
+			<false/>
+			<key>visible</key>
+			<true/>
+		</dict>
+	</array>
+</dict>
+</plist>

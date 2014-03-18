@@ -1,0 +1,286 @@
+/* 
+  Localizable.strings
+  MustacheBash
+
+  Created by Tatyana Remayeva on 6/20/12.
+  Copyright (c) 2012 Bright Newt. All rights reserved.
+*/
+/* purchase alert text */
+"%@ has been purchased!" = "你已經購買了%@。好好享用吧！";
+
+/* Restore purchases OK alert text */
+"All purchases has been successfully restored. Enjoy your mustaches!" = "所有交易都已成功被恢復。好好享受鬍子為你帶來的無窮樂趣吧！";
+
+/* iRate alert text */
+"Are you happy with this app?" = "你是否正在享受此應用程式為你帶來的樂趣？";
+
+/* Nab bar button */
+"Cancel" = "取消";
+
+/* Facebook Wall post descritpion */
+"Check out Mustache Bash app to get great staches even if your own are lousy." = "你現在要立刻去看看鬍子來襲！它是一款可以把搞笑鬍子添加到你照片上的全新iPhone應用程式。";
+
+/* Share picture by email - body */
+"Share by email with glob.ly link %@" = "來看看我最新的鬍子來襲傑作吧……\n\n 現在就從App Store下載 - %@\n\n 查看Facebook專頁 - http://www.facebook.com/MustacheBashAppPage\n\n 在Twitter關注 - http://twitter.com/#!/mustachebashapp";
+
+/* Default twitter text for mustached picture sharing */
+"Check out my mustache! via @mustachebashapp" = "看看我的鬍子！通過@mustachebashapp";
+
+/* Info screen - share app via twitter - tweet text */
+"Check out this hilarious app @mustachebashapp!" = "現在立刻就去看看這個搞笑的應用程式……@mustachebashapp！";
+
+/* Facebook invitation notification text */
+"Check this out" = "你一定要去看看這個叫做鬍子來襲的搞笑iPhone應用程式！";
+
+/* Info screen nav bar button */
+"Close" = "關閉";
+
+/* Info screen button title */
+"Contact Support" = "聯繫技術支援";
+
+/* No comment provided by engineer. */
+"Dismiss" = "取消";
+
+/* Info screen - share app by email - body */
+"Share app by email from Info screen with glob.ly %@" = "喂，你一定要下載鬍子來襲。\n\n 你可以在照片上添加搞笑的鬍子，然後把它發佈上Facebook和Twitter。現在就去App Store下載 - %@\n\n 查看Facebook專頁 - http://www.facebook.com/MustacheBashAppPage\n\n 在Twitter關注 - http://twitter.com/#!/mustachebashapp";
+
+/* Info screen button title */
+"Email to Friends" = "發送電郵給朋友";
+
+/* Alert title */
+"Error" = "錯誤";
+
+/* email error alert text */
+"Error sending email: %@" = "哎喲……電郵未能成功發送： %@";
+
+/* No comment provided by engineer. */
+"Error sending sms. Try again!" = "抱歉……文本内容未能成功發送。請再試一次。";
+
+/* Web-view error - alert text */
+"Failed connecting to the server. Please try later" = "嗯，伺服器沒有反應。請再試一次。";
+
+/* Facebook authorization failure - alert text */
+"Failed to authorize with Facebook" = "哎呀！Facebook授權失敗。請再試一次！";
+
+/* Info screen - contact support - email subject */
+"Feedback - StacheBash ver %@" = "鬍子來襲版本%@的建設性意見";
+
+/* Info screen button title */
+"Follow on Facebook" = "在Facebook關注";
+
+/* Info screen button title */
+"Follow on Twitter" = "在Twitter關注";
+
+/* Facebook invitation message */
+"Get new cool staches!" = "你一定要看看這個有趣的應用程式！";
+
+/* Facebook Wall post action item */
+"Get your Mustaches!" = "現在立刻去整一個鬍子造型吧。";
+
+/* Info screen - contact support - email body */
+"Hi there,\n" = "你好，\n";
+
+/* Send to BrightNewt - email body */
+"Hi there,\n\n here's my stachebashed picture for Bright Newt contest" = "你好，\n\n 這是我最新的鬍子造型傑作。請把它放在鬍子來襲的Facebook專面，拜託拜託啦！";
+
+/* Facebook Wall post name */
+"I'm using Mustache Bash iOS app!" = "我對鬍子來襲着迷了，這可能是這一代iOS軟件中最正的應用程式！";
+
+/* Web-view error - alert title */
+"Internal error" = "内部錯誤";
+
+/* Alert title */
+"Internet connection required to see Cool Stuff" = "且慢！你要有網絡連線才能看到酷料。 ";
+
+/* Info screen button title */
+"Invite Facebook friends" = "邀請Facebook朋友";
+
+/* Disabled IAP alert message text */
+"It looks like you have disabled In-App purchases in your settings. Please enable them and try again." = "嗯……你手機設置中的應用程式内購功能尚未啟動。請啟動它然後重試。";
+
+/* Info screen button title */
+"Legal" = "法律事宜";
+
+/* Info screen button title */
+"Logout of Facebook" = "登出Facebook";
+
+/* Web-view error - alert text */
+"Looks like there is no internet access. Please check your internet connection and mobile settings or try later" = "你似乎沒有網絡連線。請查看連線以及手機設定後重試。";
+
+/* No comment provided by engineer. */
+"Looks like there's no email account setup. Please, check your email settings" = "你似乎沒有設立任何電郵戶口。請查看你的電郵設定";
+
+/* App name in iRate Alert
+ Facebook Wall post caption */
+"Mustache Bash" = "鬍子來襲";
+
+/* Info screen nav bar title */
+"Mustache Bash v%@" = "鬍子來襲 v%@";
+
+/* Info screen nav bar title */
+"Mustache Bash Luxury v%@" = "鬍子來襲豪華 v%@";
+
+/* Web-view error - alert title */
+"Network error" = "網絡錯誤";
+
+/* iRate alert - NO */
+"No :(" = "不要 :(";
+
+/* Send to BrightNewt - alert no button */
+"Not this time" = "太快了，下一次";
+
+/* No comment provided by engineer. */
+"Optional caption" = "添加自選標題";
+
+/* alert title */
+"Purchase complete" = "購買完成";
+
+/* Purchases failed error alert title */
+"Purchase failed with error: %@" = "發生了錯誤，購買失敗: %@";
+
+/* Restore purchases OK alert title */
+"Restoring complete" = "恢復完成";
+
+/* Restore purchases error alert text */
+"Restoring purchases failed with error: %@" = "發生了錯誤，未能恢復購買: %@";
+
+/* Info screen button title */
+"Review on Appstore" = "在App Store寫下評價";
+
+/* Send to BrightNewt - alert yes button */
+"Send it" = "發送";
+
+/* Send to BrightNewt - alert title */
+"Send to BrightNewt" = "發送至Bright Newt";
+
+/* Nab bar button */
+"Share" = "分享";
+
+/* Facebook sharing screen Nav bar title */
+"Share to facebook" = "在Facebook分享";
+
+/* Info screen button title */
+"Share to Facebook" = "在Facebook分享";
+
+/* Info screen button title */
+"Share to Twitter" = "在Twitter分享";
+
+/* Info screen button title */
+"Share via SMS" = "通過文字分享";
+
+/* Web-view error - alert text */
+"Something unexpected has happened" = "發生了意外錯誤";
+
+/* FB sharing error message */
+"Something went wrong while posting your pic to Facebook! You can try it again" = "將照片發佈上Facebook時發生了錯誤！再試一次。";
+
+/* Info screen - share app by email - subject */
+"StacheBash - coolest iphone app ever" = "鬍子來襲——史上最有趣的iPhone應用程式";
+
+/* Send to BrightNewt - email subject */
+"Stachebashed to BrightNewt" = "把鬍子來襲的照片發送到Bright Newt！";
+
+/* Facebook alert title
+ Share picture by email - subject
+ Successful Save to photo album - alert title */
+"Stachebashed!" = "鬍子來襲！";
+
+/* Legal screen - Nav Bar title */
+"Terms Of Use" = "使用條款";
+
+/* Alert title */
+"Tip" = "小建議";
+
+/* No products for IAP error - alert text */
+"Unable to retrieve product from iTunes Store. Check your internet connection and try again." = "我們的專業機器人無法恢復你在iTunes的購買。請查看你的網絡連線然後再試一次。";
+
+/* No comment provided by engineer. */
+"Warning" = "警告";
+
+/* No camera eror
+ No camera error */
+"We are sorry, but this functionality is not available at your device." = "抱歉……此功能不適用於你的裝置。";
+
+/* Info screen - sms - error alert text */
+"Weird, but you cannot send an sms." = "奇怪……你的裝置不能發送簡訊。";
+
+/* Alert text */
+"When you see the color wheel icon, you can tap it to change the mustache color." = "當你看到色輪圖示時，點擊它來更換鬍子顏色。";
+
+/* iRate alert - YES */
+"Yes!" = "是的！";
+
+/* Send to BrightNewt - alert text */
+"You can send your picture to BrightNewt and find it on Mustache Bash Facebook Page" = "您你可以把你的照片發送到Bright Newt，如果它真的是超美或超帥，它們會被發佈到鬍子來襲的Facebook專頁上。";
+
+/* Info screen - share facebook - no connection error alert text */
+"You need to be connected to Internet to interact with Facebook." = "你要有網絡連線才可以使用Facebook。";
+
+/* No comment provided by engineer. */
+"You need to be connected to Internet to share on Facebook." = "你要有網絡連線才可以在Facebook上分享。";
+
+/* Info screen - share via twitter - error alert text
+ No twiter account alert text */
+"You need to setup at least 1 twitter account or allow the app to send tweets on your behalf. Please check Twitter in Settings application" = "你要設立至少一個Twitter戶口，或允許此應用程式代表你發送推文(tweet)。請查看你裝置上的Twitter設定。";
+
+/* No comment provided by engineer. */
+"Your Facebook session has expired." = "你的Facebook登錄時間已過期。";
+
+/* Facebook alert notification text */
+"Your picture was posted successfully." = "鬍子來襲！你已成功發佈你的照片。";
+
+/* Successful Save to photo album - alert text */
+"Your picture was saved successfully." = "鬍子來襲！你已成功儲存你的照片。";
+
+/* Info screen - SMS body text */
+"Share app by sms with glob.ly link %@" = "現在立刻下載此應用程式。它真的非常搞笑……你可以在任何東西上加上一撇鬍子%@";
+
+/* Info screen copyright */
+"© BrightNewt 2012" = "© Bright Newt 2012";
+
+/* Alert title. */
+"Facebook Error" = "Facebook錯誤";
+
+/* Facebook failed to open dialog - error alert text */
+"Oops... something went haywire. Try it again" = "發生了錯誤。再試一次。";
+
+/* Tsaiclip alert title */
+"Tsaiclip title" = "看上去不錯！";
+
+/* Tsaiclip dollar sign alert text */
+"Make a statement with a moustache tie clip from tsaiclip.com!" = "從tsaiclip.com用鬍子領帶夾發起聲明！";
+
+/* Tsai clip alert - NO */
+"No Thanks" = "不用了，謝謝";
+
+/* Tsai clip alert - YES */
+"Show Me" = "給我看";
+
+/* Rate title */
+"Rate %@" = "評價%@";
+
+"Your app makes me sad - ver %@" = "你的這款應用軟體讓我用的很不開心——ver %@";
+
+"device: %@\n" = "設備：%@\n";
+
+"system: %@ %@\n" = "系統：%@ %@\n";
+
+"Hi there,\n\n Your app is frustrating to use because...\n\n\n\n\nMy device properties are:\n%@" = "你好，\n\n 使用你的這款應用軟體讓人很惱火……\n\n\n\n\n我的設備設備性能是：\n%@";
+
+/* Info screen button title */
+"Moustache Tie Clips" = "鬍子領帶夾";
+
+"Da Vinci pack" = "達芬奇組合";
+
+"Tennessee pack" = "田納西組合";
+
+"Comic Book pack" = "卡通漫畫組合";
+
+"Celebrity pack" = "名人組合";
+
+"Costume pack" = "裝扮組合";
+
+"Solid Gold pack" = "純金組合";
+
+"Free mustaches" = "免費鬍子";
+

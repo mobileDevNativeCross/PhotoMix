@@ -1,0 +1,282 @@
+/* 
+  Localizable.strings
+  MustacheBash
+
+  Created by Tatyana Remayeva on 6/20/12.
+  Copyright (c) 2012 Bright Newt. All rights reserved.
+*/
+/* purchase alert text */
+"%@ has been purchased!" = "You have purchased %@. Enjoy!";
+
+/* Restore purchases OK alert text */
+"All purchases has been successfully restored. Enjoy your mustaches!" = "All purchases has been successfully restored. Enjoy your mustaches!";
+
+/* iRate alert text */
+"Are you happy with this app?" = "Are you enjoying this app?";
+
+/* Nab bar button */
+"Cancel" = "Cancel";
+
+/* Facebook Wall post descritpion */
+"Check out Mustache Bash app to get great staches even if your own are lousy." = "You've got to check out Mustache Bash now! It's a new iPhone app that puts hilarious mustaches on your pictures.";
+
+/* Share picture by email - body */
+"Share by email with glob.ly link %@" = "Check out my latest Mustache Bash masterpiece...\n\n Download it now from the App Store - %@\n\n Check out the Facebook page - http://www.facebook.com/MustacheBashAppPage\n\n Follow on Twitter - https://twitter.com/brightnewt";
+
+/* Default twitter text for mustached picture sharing */
+"Check out my mustache! via @mustachebashapp" = "Check out my mustache! via @mustachebashapp";
+
+/* Info screen - share app via twitter - tweet text */
+"Check out this hilarious app @mustachebashapp!" = "Check out this hilarious app right now... @mustachebashapp!";
+
+/* Facebook invitation notification text */
+"Check this out" = "You've got to check out this hilarious iPhone app called Mustache Bash!";
+
+/* Info screen nav bar button */
+"Close" = "Close";
+
+/* Info screen button title */
+"Contact Support" = "Contact Support";
+
+/* No comment provided by engineer. */
+"Dismiss" = "Dismiss";
+
+/* Info screen - share app by email - body */
+"Share app by email from Info screen with glob.ly %@" = "Hey, you've got to download Mustache Bash.\n\n You can put funny mustaches on your pictures then post them to Facebook and Twitter. Download it now from the App Store - %@\n\n Check out the Facebook page - http://www.facebook.com/MustacheBashAppPage \n\n Follow on Twitter - https://twitter.com/brightnewt";
+
+/* Info screen button title */
+"Email to Friends" = "Email to Friends";
+
+/* Alert title */
+"Error" = "Error";
+
+/* email error alert text */
+"Error sending email: %@" = "Oops...Email didn't send: %@";
+
+/* No comment provided by engineer. */
+"Error sending sms. Try again!" = "Sorry...the text didn't send. Try it again.";
+
+/* Web-view error - alert text */
+"Failed connecting to the server. Please try later" = "Hmm. The server was unresponsive. Give it another try.";
+
+/* Facebook authorization failure - alert text */
+"Failed to authorize with Facebook" = "Crappers! Failed to authorize with Facebook. Try it again!";
+
+/* Info screen - contact support - email subject */
+"Feedback - StacheBash ver %@" = "Constructive Criticism for StacheBash ver %@";
+
+/* Info screen button title */
+"Follow on Facebook" = "Follow on Facebook";
+
+/* Info screen button title */
+"Follow on Twitter" = "Follow on Twitter";
+
+/* Facebook invitation message */
+"Get new cool staches!" = "You've got to check out this funny app!";
+
+/* Facebook Wall post action item */
+"Get your Mustaches!" = "Get a mustache right now.";
+
+/* Info screen - contact support - email body */
+"Hi there,\n" = "Hi there,\n";
+
+/* Send to BrightNewt - email body */
+"Hi there,\n\n here's my stachebashed picture for Bright Newt contest" = "Hi there,\n\n Here's my last stachebashed masterpiece. Put it up on the Mustache Bash Facebook page, pretty pretty please!";
+
+/* Facebook Wall post name */
+"I'm using Mustache Bash iOS app!" = "I'm really digging Mustache Bash, perhaps the most handsome iOS app of its generation!";
+
+/* Web-view error - alert title */
+"Internal error" = "Internal error";
+
+/* Alert title */
+"Internet connection required to see Cool Stuff" = "Woah there, you need an Internet connection to see Cool Stuff.";
+
+/* Info screen button title */
+"Invite Facebook friends" = "Invite Facebook Friends";
+
+/* Disabled IAP alert message text */
+"It looks like you have disabled In-App purchases in your settings. Please enable them and try again." = "Hmm...it looks like you disabled in-app purchases in your settings. Please enable them and try again.";
+
+/* Info screen button title */
+"Legal" = "Legal";
+
+/* Info screen button title */
+"Logout of Facebook" = "Logout of Facebook";
+
+/* Web-view error - alert text */
+"Looks like there is no internet access. Please check your internet connection and mobile settings or try later" = "Looks like you don't have internet access. Check your connection and mobile settings and try again.";
+
+/* No comment provided by engineer. */
+"Looks like there's no email account setup. Please, check your email settings" = "Looks like there's no email account set up. Please check your email settings";
+
+/* App name in iRate Alert
+ Facebook Wall post caption */
+"Mustache Bash" = "Mustache Bash";
+
+/* Web-view error - alert title */
+"Network error" = "Network error";
+
+/* iRate alert - NO */
+"No :(" = "No :(";
+
+/* Send to BrightNewt - alert no button */
+"Not this time" = "Not so fast";
+
+/* No comment provided by engineer. */
+"Optional caption" = "Add optional caption";
+
+/* alert title */
+"Purchase complete" = "Purchase Complete";
+
+/* Purchases failed error alert title */
+"Purchase failed with error: %@" = "Purchase failed with error: %@";
+
+/* Restore purchases OK alert title */
+"Restoring complete" = "Restoring Complete";
+
+/* Restore purchases error alert text */
+"Restoring purchases failed with error: %@" = "Restoring purchases failed with error: %@";
+
+/* Info screen button title */
+"Review on Appstore" = "Review on App Store";
+
+/* Send to BrightNewt - alert yes button */
+"Send it" = "Send it";
+
+/* Send to BrightNewt - alert title */
+"Send to BrightNewt" = "Send to Bright Newt";
+
+/* Nab bar button */
+"Share" = "Share";
+
+/* Facebook sharing screen Nav bar title */
+"Share to facebook" = "Share to Facebook";
+
+/* Info screen button title */
+"Share to Facebook" = "Share to Facebook";
+
+/* Info screen button title */
+"Share to Twitter" = "Share to Twitter";
+
+/* Info screen button title */
+"Share via SMS" = "Share via Text";
+
+/* Web-view error - alert text */
+"Something unexpected has happened" = "Something unexpected has happened";
+
+/* FB sharing error message */
+"Something went wrong while posting your pic to Facebook! You can try it again" = "Something went wrong while posting your pic to Facebook! Try it again.";
+
+/* Info screen - share app by email - subject */
+"StacheBash - coolest iphone app ever" = "Mustache Bash - funniest iphone app ever";
+
+/* Send to BrightNewt - email subject */
+"Stachebashed to BrightNewt" = "Stachebashed to Bright Newt!";
+
+/* Facebook alert title
+ Share picture by email - subject
+ Successful Save to photo album - alert title */
+"Stachebashed!" = "Stachebashed!";
+
+/* Legal screen - Nav Bar title */
+"Terms Of Use" = "Terms Of Use";
+
+/* Alert title */
+"Tip" = "Tip";
+
+/* No products for IAP error - alert text */
+"Unable to retrieve product from iTunes Store. Check your internet connection and try again." = "Our special robots couldn't retrieve your purchase from iTunes. Check your Internet connection and try again.";
+
+/* No comment provided by engineer. */
+"Warning" = "Warning";
+
+/* No camera eror
+ No camera error */
+"We are sorry, but this functionality is not available at your device." = "Sorry...this functionality is not available on your device.";
+
+/* Info screen - sms - error alert text */
+"Weird, but you cannot send an sms." = "Weird...your device can't send a text.";
+
+/* Alert text */
+"When you see the color wheel icon, you can tap it to change the mustache color." = "When you see the color wheel icon, tap on it to change the mustache color.";
+
+/* iRate alert - YES */
+"Yes!" = "Yes!";
+
+/* Send to BrightNewt - alert text */
+"You can send your picture to BrightNewt and find it on Mustache Bash Facebook Page" = "You can send your picture to Bright Newt, and if it's totally awesome, they'll post it on the Mustache Bash Facebook Page.";
+
+/* Info screen - share facebook - no connection error alert text */
+"Instagram unavailable. You need to install Instagram in your device in order to share this image." = "Instagram unavailable. You need to install Instagram in your device in order to share this image.";
+
+/* Info screen - share facebook - no connection error alert text */
+"You need to be connected to Internet to interact with Facebook." = "You need to be connected to Internet to use Facebook.";
+
+/* No comment provided by engineer. */
+"You need to be connected to Internet to share on Facebook." = "You need to be connected to Internet to share on Facebook.";
+
+/* Info screen - share via twitter - error alert text
+ No twiter account alert text */
+"You need to setup at least 1 twitter account or allow the app to send tweets on your behalf. Please check Twitter in Settings application" = "You need to setup at least 1 twitter account or allow the app to send tweets on your behalf. Please check Twitter in your device's Settings.";
+
+/* No comment provided by engineer. */
+"Your Facebook session has expired." = "Your Facebook session has expired.";
+
+/* Facebook alert notification text */
+"Your picture was posted successfully." = "Stachebashed! Your picture was posted successfully.";
+
+/* Successful Save to photo album - alert text */
+"Your picture was saved successfully." = "Stachebashed! Your picture was saved successfully.";
+
+/* Info screen - SMS body text */
+"Share app by sms with glob.ly link %@" = "Download this app right now. It's hilarious...you can put a mustache on anything %@";
+
+/* Info screen copyright */
+"© BrightNewt 2013" = "© Bright Newt 2013";
+
+/* Alert title. */
+"Facebook Error" = "Facebook Error";
+
+/* Facebook failed to open dialog - error alert text */
+"Oops... something went haywire. Try it again" = "Something went haywire. Try it again.";
+
+/* Tsaiclip alert title */
+"Tsaiclip title" = " Looking good!";
+
+/* Tsaiclip dollar sign alert text */
+"Make a statement with a moustache tie clip from tsaiclip.com!" = "Make a statement with a moustache tie clip from tsaiclip.com";
+
+/* Tsai clip alert - NO */
+"No Thanks" = "No Thanks";
+
+/* Tsai clip alert - YES */
+"Show Me" = "Show Me";
+
+/* Rate title */
+"Rate %@" = "Rate %@";
+
+"Your app makes me sad - ver %@" = "Your app makes me sad - ver %@";
+
+"device: %@\n" = "device: %@\n";
+
+"system: %@ %@\n" = "system: %@ %@\n";
+
+"Hi there,\n\n Your app is frustrating to use because...\n\n\n\n\nMy device properties are:\n%@" = "Hi there,\n\n Your app is frustrating to use because...\n\n\n\n\nMy device properties are:\n%@";
+
+/* Info screen button title */
+"Moustache Tie Clips" = "Moustache Tie Clips";
+
+"Da Vinci pack" = "Da Vinci pack";
+
+"Tennessee pack" = "Tennessee pack";
+
+"Comic Book Pack" = "Comic Book Pack";
+
+"Celebrity pack" = "Celebrity pack";
+
+"Costume pack" = "Costume pack";
+
+"Solid Gold pack" = "Solid Gold pack";
+
+"Free mustaches" = "Free mustaches";
