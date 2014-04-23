@@ -51,6 +51,8 @@ static const NSTimeInterval kTimeLimit = 0.1;
         self.highlightImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: highlightImageName]];
         self.highlightImageView.center = CGPointMake(round( 0.5 * self.bounds.size.width),
                                                      round( 0.5 * self.bounds.size.height));
+        
+        
         self.highlightImageView.userInteractionEnabled = YES;
         self.highlightImageView.alpha = 0.0;
         

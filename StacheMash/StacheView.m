@@ -118,7 +118,7 @@
         self.imageView.center = CGPointMake(0.5 * frame.size.width, 0.5 * frame.size.height);
         self.imageView.image = image;
         [self addSubview: self.imageView];
-        
+ 
         // add TAP gesture recognizer
         UITapGestureRecognizer *tapGesture =
         [[UITapGestureRecognizer alloc] initWithTarget: self
@@ -128,9 +128,54 @@
         self.handlesView = [[UIView alloc] initWithFrame: [self handlesFrameForRect: frame]];
         self.handlesView.center = self.imageView.center;
         self.handlesView.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent: 0.05];
-        self.handlesView.layer.borderWidth = 1.0;
+        //self.handlesView.layer.borderWidth = 1.0;
         self.handlesView.layer.borderColor = [UIColor colorWithWhite: 0.9 alpha: 0.6].CGColor;
-        self.handlesView.layer.cornerRadius = (100 < image.size.width ? 15.0 : 5.0);
+//        self.handlesView.layer.cornerRadius = (100 < image.size.width ? 15.0 : 5.0);
+        UIView * view = [[UIView alloc] init];
+        view.layer.borderWidth  =1;
+        CGRect btnFrame = CGRectMake(0, 0, 4, 1);
+
+       view.frame= btnFrame;
+        [self.handlesView addSubview:view];
+        view = [[UIView alloc] init];
+        view.frame = CGRectMake(0, 0, 1, 4);
+        view.layer.borderWidth  =1;
+         [self.handlesView addSubview:view];
+        
+        view = [[UIView alloc] init];
+        view.frame = CGRectMake(self.handlesView.frame.size.width, 0, 1, 4);
+        view.layer.borderWidth  =1;
+        [self.handlesView addSubview:view];
+
+        
+        view = [[UIView alloc] init];
+        view.frame = CGRectMake(self.handlesView.frame.size.width-3, 0, 3, 1);
+        view.layer.borderWidth  =1;
+        [self.handlesView addSubview:view];
+/////////////down/////////////////
+        view = [[UIView alloc] init];
+        view.layer.borderWidth  =1;
+        view.frame=CGRectMake(0, self.handlesView.frame.size.height, 4, 1);
+        [self.handlesView addSubview:view];
+        
+        view = [[UIView alloc] init];
+        view.frame = CGRectMake(0, self.handlesView.frame.size.height-3, 1, 4);
+        view.layer.borderWidth  =1;
+        [self.handlesView addSubview:view];
+        
+        view = [[UIView alloc] init];
+        view.frame = CGRectMake(self.handlesView.frame.size.width, self.handlesView.frame.size.height-3, 1, 4);
+        view.layer.borderWidth  =1;
+        [self.handlesView addSubview:view];
+        
+        
+        view = [[UIView alloc] init];
+        view.frame = CGRectMake(self.handlesView.frame.size.width-3, self.handlesView.frame.size.height, 4, 1);
+        view.layer.borderWidth  =1;
+        [self.handlesView addSubview:view];
+/////////////////////////
+        //dima
+        
     }
     
     return self;

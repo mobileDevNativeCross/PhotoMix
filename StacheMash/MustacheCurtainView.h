@@ -21,7 +21,7 @@
 @end
 
 
-@interface MustacheCurtainView : UIView
+@interface MustacheCurtainView : UIView<UIScrollViewDelegate>
 
 @property (assign, nonatomic) id<MustacheCurtainViewDelegate> delegate;
 @property (assign, nonatomic, readonly) BOOL visible;

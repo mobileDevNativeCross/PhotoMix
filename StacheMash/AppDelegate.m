@@ -9,7 +9,7 @@
 #import "AppDelegate.h"
 #import "StartPageViewController.h"
 #import "FacebookManager.h"
-#import "iRate.h"
+//#import "iRate.h"
 #import "Flurry.h"
 #import "FlurryAds.h"
 #import "DataModel.h"
@@ -17,6 +17,10 @@
 #import "PictureViewController.h"
 #import "NavController.h"
 #import "TapjoyConnect.h"
+#import "MKStoreManager.h"
+#import <VKSdk.h>
+
+//#import <VKSdk.h>
 
 #import "vunglepub.h"
 #import "PlayHavenSDK.h"
@@ -54,6 +58,11 @@ void exceptionHandler(NSException *exception);
 @synthesize navController = _navController;
 @synthesize jokesArray = _jokesArray;
 @synthesize iTunesURL = _iTunesURL;
+
+
+
+
+
 
 - (BOOL)application: (UIApplication*)application didFinishLaunchingWithOptions: (NSDictionary*)launchOptions
 {
@@ -122,7 +131,7 @@ void exceptionHandler(NSException *exception);
 //#endif
     
     // configure iRate
-    iRate *rate = [iRate sharedInstance];
+    /*iRate *rate = [iRate sharedInstance];
 
 #if MB_LUXURY
     rate.appStoreID = 594894839;
@@ -141,7 +150,7 @@ void exceptionHandler(NSException *exception);
     
     rate.usesUntilPrompt = 3;
     rate.eventsUntilPrompt = 3;
-    
+    */
     [DataModel sharedInstance];
     [FacebookManager sharedInstance];
     
@@ -188,6 +197,7 @@ void exceptionHandler(NSException *exception);
   //  [self preloadPlayHaven];
     
 #endif
+    [MKStoreManager sharedManager];
     
     return YES;
 }
@@ -414,7 +424,9 @@ void exceptionHandler(NSException *exception);
 - (BOOL)application: (UIApplication*)application handleOpenURL: (NSURL*)url {
     
   //  return [[FacebookManager sharedInstance].facebook handleOpenURL: url];
+   // [OKSession.activeSession handleOpenURL:url];
     return [FBSession.activeSession handleOpenURL:url];
+    
 }
 
 
@@ -426,8 +438,11 @@ void exceptionHandler(NSException *exception);
      return [FBSession.activeSession handleOpenURL:url];
  //   return [[FacebookManager sharedInstance].facebook handleOpenURL: url];
 }
-
-
+-(BOOL)application:(UIApplication *)application openURLMY:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    [VKSdk processOpenURL:url fromApplication:sourceApplication];
+    return YES;
+}
 // Process a URL to something iPhone can handle
 - (void)openReferralURL:(NSURL *)referralURL
 {

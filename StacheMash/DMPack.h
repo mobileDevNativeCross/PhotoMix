@@ -11,7 +11,7 @@
 
 @class DMStache;
 
-@interface DMPack : DMObject
+@interface DMPack : DMObject<UIScrollViewDelegate>
 
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) NSString *path;

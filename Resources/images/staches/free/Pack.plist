@@ -6,123 +6,51 @@
 	<array>
 		<dict>
 			<key>title</key>
-			<string>Burt</string>
+			<string>Best example 1</string>
 			<key>baseName</key>
-			<string>burt</string>
+			<string>greenRect</string>
 			<key>baseNameIpad</key>
-			<string>burt-ipad</string>
+			<string>burt1-ipad</string>
 		</dict>
 		<dict>
 			<key>title</key>
-			<string>Charlie</string>
+			<string>Best example 2</string>
 			<key>baseName</key>
-			<string>charlie</string>
+			<string>greenRect1</string>
 			<key>baseNameIpad</key>
-			<string>charlie-ipad</string>
+			<string>charlie1-ipad</string>
 		</dict>
 		<dict>
 			<key>title</key>
-			<string>Sam</string>
+			<string>Best example 3</string>
 			<key>baseName</key>
-			<string>elliot</string>
+			<string>greenRect2</string>
 			<key>baseNameIpad</key>
-			<string>elliot-ipad</string>
+			<string>elliot1-ipad</string>
 		</dict>
 		<dict>
 			<key>title</key>
-			<string>Fu</string>
+			<string>Best example 4</string>
 			<key>baseName</key>
-			<string>fu</string>
+			<string>greenRect3</string>
 			<key>baseNameIpad</key>
-			<string>fu-ipad</string>
+			<string>fu1-ipad</string>
 		</dict>
 		<dict>
 			<key>title</key>
-			<string>Groucho</string>
+			<string>Best example 5</string>
 			<key>baseName</key>
-			<string>groucho</string>
+			<string>greenRect4</string>
 			<key>baseNameIpad</key>
-			<string>groucho-ipad</string>
+			<string>groucho1-ipad</string>
 		</dict>
 		<dict>
 			<key>title</key>
-			<string>Khan</string>
+			<string>Best example 6</string>
 			<key>baseName</key>
-			<string>khan</string>
+			<string>greenRect5</string>
 			<key>baseNameIpad</key>
-			<string>khan-ipad</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>Mario</string>
-			<key>baseName</key>
-			<string>mario</string>
-			<key>baseNameIpad</key>
-			<string>mario-ipad</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>McBee</string>
-			<key>baseName</key>
-			<string>mcbee</string>
-			<key>baseNameIpad</key>
-			<string>mcbee-ipad</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>Ned</string>
-			<key>baseName</key>
-			<string>ned</string>
-			<key>baseNameIpad</key>
-			<string>ned-ipad</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>Poirot</string>
-			<key>baseName</key>
-			<string>poirot</string>
-			<key>baseNameIpad</key>
-			<string>poirot-ipad</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>Rollie</string>
-			<key>baseName</key>
-			<string>rollie</string>
-			<key>baseNameIpad</key>
-			<string>rollie-ipad</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>Tom</string>
-			<key>baseName</key>
-			<string>tom</string>
-			<key>baseNameIpad</key>
-			<string>tom-ipad</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>Erak</string>
-			<key>baseName</key>
-			<string>erak</string>
-			<key>baseNameIpad</key>
-			<string>erak-ipad</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>Tsaiclip</string>
-			<key>baseName</key>
-			<string>tie-clip</string>
-			<key>baseNameIpad</key>
-			<string>tie-clip-ipad</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>Yeats</string>
-			<key>baseName</key>
-			<string>yeats</string>
-			<key>baseNameIpad</key>
-			<string>yeats-ipad</string>
+			<string>khan1-ipad</string>
 		</dict>
 	</array>
 	<key>banners</key>

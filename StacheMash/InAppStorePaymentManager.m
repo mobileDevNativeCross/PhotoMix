@@ -41,6 +41,7 @@
 	if ( self = [super init] ) {
 		[[SKPaymentQueue defaultQueue ] addTransactionObserver: self];
 	}
+    
 	return self;
 }
 
@@ -169,7 +170,7 @@
     debug(@"RESTORING complete");
     
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Restoring complete", @"Restore purchases OK alert title")
-                                                    message: NSLocalizedString(@"All purchases has been successfully restored. Enjoy your mustaches!", @"Restore purchases OK alert text")
+                                                    message: NSLocalizedString(@"All purchases has been successfully restored. Enjoy your Dental Diamonds!", @"Restore purchases OK alert text")
                                                    delegate: nil
                                           cancelButtonTitle: NSLocalizedString( @"Dismiss", @"")
                                           otherButtonTitles: nil];

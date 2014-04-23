@@ -24,8 +24,8 @@ static NSString *kNSUserDefaultsGotFreePack = @"kNSUserDefaultsGotFreePack";
 
 static NSString *kNSUserDefaultsShouldShowBannerAds = @"kNSUserDefaultsShouldShowBannerAds";
 
-static NSString *kRemoveAdsProductId = @"com.brightnewt.mustachebash.remove_banner_ad";
-static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_packs";
+static NSString *kRemoveAdsProductId = @"com.joshkocaurek.dentaldiamonds.3";
+static NSString *kUnlockAllProductId = @"com.joshkocaurek.dentaldiamonds.4";
 
 
 @interface DataModel ()
@@ -146,9 +146,9 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
 
 - (NSArray*)packsArray
 {
-    if ( nil == __packsArray ) {
+  //  if ( nil == __packsArray ) {
         __packsArray = [self loadPacksList];
-    }
+    //}
     return __packsArray;
 }
 
@@ -171,6 +171,7 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
     dispatch_once(&predicate, ^{
         sharedModel = [[DataModel alloc] init];
     });
+    
     
     return sharedModel;
 }
@@ -220,12 +221,14 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
 
 - (NSArray*)purchasedPacks
 {
+    NSLog(@"self.packsArray==%@",[self.packsArray filteredArrayUsingPredicate: [NSPredicate predicateWithFormat: @"SELF.visible = YES"]]);
     return [self.packsArray filteredArrayUsingPredicate: [NSPredicate predicateWithFormat: @"SELF.visible = YES"]];
 }
 
 
 - (NSArray*)nonPurchasedPacks
 {
+     NSLog(@"self.packsArraynonPurchasedPacks==%@",self.packsArray);
     return [self.packsArray filteredArrayUsingPredicate: [NSPredicate predicateWithFormat: @"SELF.bought = NO"]];
 }
 
@@ -278,14 +281,15 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
 
 - (void)purchasePack: (DMPack*)pack
 {
+    NSLog(@"IAP_id==%@",pack.staches);
     if ( [pack.bought boolValue] ) {
         warn(@"pack is already bought");
-        return;
+      //  return;
     }
     
     if ( 0 == [pack.IAP_id length] ) {
         error(@"empty pack.IAP_id");
-        return;
+        //return;
     }
     
     if ( nil != [self productForPack: pack] ) {
@@ -293,7 +297,7 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
         [self.paymentManager makePaymentWithProductIdentifier: pack.IAP_id];
     }
     else {
-        error(@"could not find product with id: %@", pack.IAP_id);
+        error(@"could not find product with id1: %@", pack.IAP_id);
         [self showNoiTunesProductsError];
     }
 }
@@ -327,7 +331,7 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
 - (void)purchaseUnlockAllMustaches
 {
     if ( self.allMustachesUnlocked ) {
-        warn(@"All Mustaches are unlocked");
+        warn(@"All Dental are unlocked");
         return;
     }
     
@@ -584,6 +588,7 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
 
 - (NSString*)mustachePlistPath
 {
+  //  NSLog(@"++====%@",[[[self applicationDocumentsDirectory] URLByAppendingPathComponent: [self mustachePlistName]] path]);
     return [[[self applicationDocumentsDirectory] URLByAppendingPathComponent: [self mustachePlistName]] path];
 }
 
@@ -591,8 +596,10 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
 - (NSString*)mustachePlistSourcePath
 {
 #if MB_LUXURY
+    NSLog(@"pthFor1==%@",[[NSBundle mainBundle] pathForResource: @"MustachePacks_Luxury" ofType: @"plist"]);
     return [[NSBundle mainBundle] pathForResource: @"MustachePacks_Luxury" ofType: @"plist"];
 #else
+    NSLog(@"pthFor2==%@",[[NSBundle mainBundle] pathForResource: @"MustachePacks" ofType: @"plist"]);
     return [[NSBundle mainBundle] pathForResource: @"MustachePacks" ofType: @"plist"];
 #endif
 }
@@ -600,7 +607,7 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
 
 - (void)copyMustachePlistToDocuments
 {
-    if ( ![[NSFileManager defaultManager] fileExistsAtPath: [self mustachePlistPath]] ) {
+    if ( true==false ) {
         warn(@"no %@ in document. Copying", [self mustachePlistName]);
         
         NSError *error = nil;
@@ -674,13 +681,19 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
 - (NSArray*)loadPacksList
 {
     NSDictionary* packsPlistDict = [[NSMutableDictionary alloc] initWithContentsOfFile: [self mustachePlistPath]];
-    
+ //   NSLog(@"packsPlistDict==%@",packsPlistDict);
+   // NSLog(@"[self mustachePlistPath]==%@",[self mustachePlistPath]);
     NSArray *packsPlistArray = [packsPlistDict objectForKey: @"packs"];
     NSMutableArray *packsArray = [[NSMutableArray alloc] init];
     
+    
+   // NSLog(@"packsPlistArray==%@",packsPlistArray);
     for ( NSDictionary *plistPack in packsPlistArray ) {
         DMPack *pack = [[DMPack alloc] initWithDictionary: plistPack];
+       //  NSLog(@"pack==%@",pack);
         [self loadStachesIntoPack: pack];
+       
+     //   NSLog(@"plistPack==%@",plistPack);
         [packsArray addObject: pack];
     }
     
@@ -700,6 +713,7 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
      [[NSBundle mainBundle] pathForResource: @"Pack"
                                      ofType: @"plist"
                                 inDirectory: [NSString stringWithFormat: @"staches/%@", pack.path]]];
+   // NSLog(@"packPlistDict+==%@",packPlistDict);
     
     NSArray *stachesPlistArray = [packPlistDict objectForKey: @"staches"];
     NSMutableArray *stachesArray = [[NSMutableArray alloc] init];
@@ -708,7 +722,7 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
         DMStache *stache = [[DMStache alloc] initWithDictionary: plistStache];
         [stachesArray addObject: stache];
     }
-    
+  //  NSLog(@"stachesArray+==%@",stachesArray);
     pack.staches = stachesArray;
     pack.banners = [packPlistDict objectForKey: @"banners"];
 }
@@ -720,10 +734,10 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
 {
     
 #if MB_LUXURY
-    return @"50f81212e94bb20e0000004d";
+    return @"5234b688c0bc358f8f00005e";
 #else
     //return @"4f9d8cbf2909c200080090bb";
-    return @"5156fc9b26a2bb120000004d"; //@"5156fc9b26a2bb120000004d";
+    return @"5234b688c0bc358f8f00005e"; //@"5156fc9b26a2bb120000004d";
 #endif
 
 }
@@ -742,9 +756,9 @@ static NSString *kUnlockAllProductId = @"com.brightnewt.mustachebash.unlock_all_
 {
     
 #if MB_LUXURY
-    return @"http://glob.ly/3Ov";
+    return @"https://itunes.apple.com/us/app/dental-diamonds/id722179499?l=ru&ls=1&mt=8";
 #else
-    return @"http://glob.ly/2nr";
+    return @"https://itunes.apple.com/us/app/dental-diamonds/id722179499?l=ru&ls=1&mt=8";
 #endif
     
 }

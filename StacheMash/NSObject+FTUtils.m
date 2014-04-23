@@ -77,11 +77,14 @@ static const char *propertyType( objc_property_t property );
 	}		
 	
 	NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity: outCount];
-	
+
+			//NSLog(@"dictionary++==%@",dictionary);
+    
     for ( i = 0; i < outCount; i++ )
 	{
         objc_property_t property = properties[ i ];
-		
+
+        
         const char *propName = property_getName( property );
 		
         if( propName )
@@ -89,9 +92,10 @@ static const char *propertyType( objc_property_t property );
 			NSString *propertyName = [NSString stringWithCString: propName
 														encoding: NSUTF8StringEncoding];
 		
-			const char *propType = propertyType( property );						
+			const char *propType = propertyType( property );
+            
 			NSString *propertyTypeString = [NSString stringWithCString: propType
-															  encoding: NSUTF8StringEncoding];
+															  encoding: NSUTF16StringEncoding];
 			
             if ( propertyTypeString ) {
                 [dictionary setObject: propertyTypeString forKey: propertyName];
@@ -99,8 +103,8 @@ static const char *propertyType( objc_property_t property );
         }
     }
 	
-    free( properties );
-	
+   // free( properties );
+	//NSLog(@"dictionaryyy===-%@",dictionary);
 	return dictionary;
 }
 

@@ -23,10 +23,30 @@ static const CGFloat kRedBgWidth = 280.0;
 static const CGFloat kYellowBgMargin = 5.0;
 
 
-@interface MustacheCurtainView ()
+@interface MustacheCurtainView ()<UIScrollViewDelegate>{
+    int pos;
+    int i;
+    
+}
+
+typedef enum ScrollDirection {
+    ScrollDirectionNone,
+    ScrollDirectionRight,
+    ScrollDirectionLeft,
+    ScrollDirectionUp,
+    ScrollDirectionDown,
+    ScrollDirectionCrazy,
+} ScrollDirection;
+
+
+@property (nonatomic, assign) CGFloat lastContentOffset;
+
+
 
 @property (strong, nonatomic) UIImageView *closeButtonImageView;
+@property (strong, nonatomic) UIImageView *leftScroll;
 @property (strong, nonatomic) UITapGestureRecognizer *closingTapGesture;
+@property (strong, nonatomic) UITapGestureRecognizer *leftScrollTapGesture;
 
 @property (assign, nonatomic) id closingTarget;
 @property (assign, nonatomic) SEL closingAction;
@@ -39,6 +59,7 @@ static const CGFloat kYellowBgMargin = 5.0;
 
 @property (strong, nonatomic) UIView *redBgView;
 @property (strong, nonatomic) UIImageView *yellowImageBgView;
+@property (strong, nonatomic) UIImageView *yellowImageBgView2;
 
 
 - (NSArray*)banneredPacks: (NSArray*)packsArray;
@@ -61,7 +82,11 @@ static const CGFloat kYellowBgMargin = 5.0;
 @synthesize delegate = __delegate;
 
 @synthesize closeButtonImageView = _closeButtonImageView;
+
+@synthesize leftScroll = _leftScroll;
 @synthesize closingTapGesture = _closingTapGesture;
+
+@synthesize leftScrollTapGesture = _leftScrollTapGesture;
 @synthesize closingTarget = _closingTarget;
 @synthesize closingAction = _closingAction;
 @synthesize contentView = _contentView;
@@ -77,39 +102,41 @@ static const CGFloat kYellowBgMargin = 5.0;
 
 - (id)initWithFrame: (CGRect)frame
 {
+    i=0;
     self = [super initWithFrame: frame];
     if ( self ) {
+     //   self.contentView.delegate = self;
         // image BG view
         UIImageView *imageBgView = [[UIImageView alloc] initWithFrame: self.bounds];
         // Sun -ipad support
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-            imageBgView.image = [UIImage imageNamed: @"bg-1@2x.png"];
+        //    imageBgView.image = [UIImage imageNamed: @"bg-1@2x.png"];
         }else{
-            imageBgView.image = [UIImage imageNamed: @"bg-1.png"];
+          //  imageBgView.image = [UIImage imageNamed: @"bg-1.png"];
         }
         
         imageBgView.userInteractionEnabled = YES;
-        imageBgView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [self addSubview: imageBgView];
+      //  imageBgView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        //[self addSubview: imageBgView];
         // Sun - iPad support
         CGFloat redBgWidth = kRedBgWidth, redBgYMargin = kRedBgYMargin;
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
             redBgWidth = 2.34 * kRedBgWidth;
             redBgYMargin = 3 * kRedBgYMargin;
         }
-        self.redBgView = [[UIView alloc] initWithFrame: CGRectMake(0.5 * (self.frame.size.width - redBgWidth),
-                                                                   redBgYMargin,
-                                                                   redBgWidth,
-                                                                   self.frame.size.height - 2 * redBgYMargin)];
+        self.redBgView = [[UIView alloc] initWithFrame: CGRectMake(0,
+                                                                   0,
+                                                                   320,
+                                                                   480)];
         
 //        self.redBgView = [[UIView alloc] initWithFrame: CGRectMake(0.5 * (self.frame.size.width - kRedBgWidth),
 //                                                                      kRedBgYMargin,
 //                                                                      kRedBgWidth,
 //                                                                      self.frame.size.height - 2 * kRedBgYMargin)];
         
-        self.redBgView.backgroundColor = [UIColor colorWithRed: 0.75 green: 0.18 blue: 0.09 alpha: 1.0];
-        self.redBgView.layer.cornerRadius = 5.0;
-        [self addSubview: self.redBgView];
+        self.redBgView.backgroundColor = [UIColor clearColor];/*[UIColor colorWithRed: 0.75 green: 0.18 blue: 0.09 alpha: 1.0]*/;
+       // self.redBgView.layer.cornerRadius = 5.0;
+        //[self addSubview: self.redBgView];
         
         // YELLOW BG
         // iPad support
@@ -121,53 +148,83 @@ static const CGFloat kYellowBgMargin = 5.0;
 
         self.yellowImageBgView = [[UIImageView alloc] initWithFrame:
                                   CGRectMake(0, 0,
-                                             self.redBgView.frame.size.width - 2 * yellowBgWidth,
+                                             320 ,
                                              self.redBgView.frame.size.height - 2 * yellowBgWidth)];
-        
+        _yellowImageBgView2 = [[UIImageView alloc] initWithFrame:CGRectMake(5, 50, 310, 200)];
+        _yellowImageBgView2.image  = [UIImage imageNamed: @"scroll.png"];
+        [self addSubview:_yellowImageBgView2];
         // iPad support
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
             self.yellowImageBgView.image = [UIImage imageNamed: @"bg-@2x.png"];
         }else{
-            self.yellowImageBgView.image = [UIImage imageNamed: @"bg-.png"];
+            self.yellowImageBgView.image = [UIImage imageNamed: @"scroll.png"];
         }
         
         self.yellowImageBgView.contentMode = UIViewContentModeScaleAspectFill;
         self.yellowImageBgView.clipsToBounds = YES;
-        self.yellowImageBgView.center = self.redBgView.center;
+       
         self.yellowImageBgView.userInteractionEnabled = YES;
-        [self addSubview: self.yellowImageBgView];
+      //  [self addSubview: self.yellowImageBgView];
         
         // SCROLL view
-        self.contentView = [[UIScrollView alloc] initWithFrame: self.yellowImageBgView.frame];
+//        self.contentView = [[UIScrollView alloc] initWithFrame: /*self.yellowImageBgView2.frame*/CGRectMake(40, self.yellowImageBgView2.frame.origin.y+22, self.yellowImageBgView2.frame.size.width-75, self.yellowImageBgView2.frame.size.height-90)];*/
+        
+        self.contentView = [[UIScrollView alloc] initWithFrame:/*self.yellowImageBgView2.frame*/CGRectMake(40, self.yellowImageBgView2.frame.origin.y-10, self.yellowImageBgView2.frame.size.width-70, self.yellowImageBgView2.frame.size.height-60)];
+           // self.contentView.layer.borderWidth  = 3;
+         self.contentView.delegate = self;
         self.contentView.userInteractionEnabled = YES;
         self.contentView.canCancelContentTouches = NO;
-        self.contentView.delaysContentTouches = YES;
+      //  self.contentView.delaysContentTouches = YES;
         self.contentView.showsVerticalScrollIndicator = NO;
-        self.contentView.alwaysBounceVertical = YES;
+        
         [self addSubview: self.contentView];
         
         // DRAW content
-        self.packViewBaseRect = self.yellowImageBgView.bounds;
+        self.packViewBaseRect = self.yellowImageBgView2.bounds;
         
         // CLOSE button
         // Sun - iPad support
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-            self.closeButtonImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @"close-ipad.png"]];
+            self.closeButtonImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @""]];
         }else{
-            self.closeButtonImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @"close.png"]];
+            //self.closeButtonImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @"RedXButton.png"]];
+            self.closeButtonImageView = [[UIImageView alloc] initWithFrame:CGRectMake([GUIHelper getRightXForView: self.redBgView] ,
+                                                                                      self.redBgView.frame.origin.y+15, 44, 80)];
+            self.leftScroll =[[UIImageView alloc] initWithFrame:CGRectMake(0 ,
+                                                                           self.redBgView.frame.origin.y+15, 44, 80)];
         }
         
-        self.closeButtonImageView.center = CGPointMake([GUIHelper getRightXForView: self.redBgView] - 5,
-                                                       self.redBgView.frame.origin.y + 8);
+        self.closeButtonImageView.center = CGPointMake([GUIHelper getRightXForView: self.redBgView]-10,
+                                                       self.redBgView.frame.origin.y+120 );
+        self.leftScroll.center = CGPointMake(5,
+                                                       self.redBgView.frame.origin.y+120 );
+        
+       // self.leftScroll.layer.borderWidth = 3;
         self.closeButtonImageView.userInteractionEnabled = YES;
+       // self.closeButtonImageView.layer.borderWidth = 3;
         [self addSubview: self.closeButtonImageView];
+       
+        self.leftScroll.userInteractionEnabled = YES;
+       // self.closeButtonImageView.layer.borderWidth = 3;
+        [self addSubview: self.leftScroll];
         
         // TAP gesture
         self.closingTapGesture = [[UITapGestureRecognizer alloc] initWithTarget: self action: @selector(handleTap:)];
         [self.closeButtonImageView addGestureRecognizer: self.closingTapGesture];
+        
+        self.leftScrollTapGesture = [[UITapGestureRecognizer alloc] initWithTarget: self action: @selector(leftScrollMY:)];
+         [self.leftScroll addGestureRecognizer: self.leftScrollTapGesture];
+        
     }
+    
+    UISwipeGestureRecognizer *swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(SwipeView)];
+    [swipe setDirection:UISwipeGestureRecognizerDirectionLeft];
+//    [[self innerView] addGestureRecognizer: swipe];
+    [self.closeButtonImageView addGestureRecognizer: swipe];
+
     return self;
 }
+
 
 
 - (void)layoutSubviews
@@ -185,7 +242,7 @@ static const CGFloat kYellowBgMargin = 5.0;
                                           self.frame.size.height - 2 * kRedBgYMargin);
         
         self.yellowImageBgView.frame = CGRectMake(0, 0,
-                                                  self.redBgView.frame.size.width - 2 * kYellowBgMargin,
+                                                  320,
                                                   self.redBgView.frame.size.height - 2 * kYellowBgMargin);
         self.yellowImageBgView.center = self.redBgView.center;
         
@@ -205,6 +262,8 @@ static const CGFloat kYellowBgMargin = 5.0;
     self.renderedPackViews = [[NSMutableArray alloc] init];
     
     for ( DMPack *pack in [[DataModel sharedInstance] purchasedPacks] ) {
+        int i;
+        NSLog(@"III==%d",i++);
         MustachePackView *packView = [[MustachePackView alloc] initWithFrame: self.packViewBaseRect
                                                                         pack: pack
                                                                parentCurtain: self
@@ -213,12 +272,13 @@ static const CGFloat kYellowBgMargin = 5.0;
                                                             shouldRenderLock: ![pack.bought boolValue]];
 
         CGRect newFrame = packView.frame;
-        newFrame.origin.y = prevPackBottom + 5; 
+        newFrame.origin.y = prevPackBottom + 15;
         packView.frame = newFrame;
         [self.contentView addSubview: packView];
         [self.renderedPackViews addObject: packView];
         
         // ADD Unlock All Mustaches BUTTON
+        
         if ( [pack.path isEqualToString: @"free"] && ![DataModel sharedInstance].allMustachesUnlocked ) {
             UIButton *button = [UIButton buttonWithType: UIButtonTypeCustom];
             // Sun - ipad support
@@ -236,7 +296,7 @@ static const CGFloat kYellowBgMargin = 5.0;
             button.center = CGPointMake(0.5 * self.contentView.bounds.size.width, [GUIHelper getBottomYForView: packView] + buttonImage.size.height);
             
             [button addTarget: self action: @selector(unlockAllPressed:) forControlEvents: UIControlEventTouchUpInside];
-            [self.contentView addSubview: button];
+      //  [self.contentView addSubview: button];
             
             // Button LABEL
             UILabel *label = [[UILabel alloc] initWithFrame: button.bounds];
@@ -260,8 +320,13 @@ static const CGFloat kYellowBgMargin = 5.0;
             prevPackBottom = [GUIHelper getBottomYForView: packView];
         }
     }
+    NSLog(@"prevPackBottom-20===%f",prevPackBottom);
     
-    self.contentView.contentSize = CGSizeMake(self.contentView.bounds.size.width, prevPackBottom);
+    
+    
+    self.contentView.contentSize = CGSizeMake(self.frame.size.width+prevPackBottom,75);//scroll view
+    NSLog(@"self.contentView.bounds.size.widthMY==%f",self.frame.size.width+prevPackBottom);
+  //self.contentView.layer.borderWidth = 3;
 }
 
 
@@ -311,8 +376,9 @@ static const CGFloat kYellowBgMargin = 5.0;
     
     [self.contentView addSubview: button];
     
-    self.contentView.contentSize = CGSizeMake(self.contentView.contentSize.width,
-                                              [GUIHelper getBottomYForView: button] + 20);
+    self.contentView.contentSize = CGSizeMake(/*self.contentView.contentSize.width-20,
+                                               [GUIHelper getBottomYForView: button]*/
+                                              [GUIHelper getBottomYForView: button],self.contentView.contentSize.width-20);
 }
 
 
@@ -345,7 +411,7 @@ static const CGFloat kYellowBgMargin = 5.0;
         
         [buyButton addTarget: self action: @selector(buyNowPressed:) forControlEvents: UIControlEventTouchUpInside];
         
-        [self.contentView addSubview: buyButton];
+        //[self.contentView addSubview: buyButton];
     }
     
     // PACK view 
@@ -356,9 +422,9 @@ static const CGFloat kYellowBgMargin = 5.0;
                                                           buttonsEnabled: NO
                                                         shouldRenderLock: NO];
     CGRect newFrame = packView.frame;
-    newFrame.origin.y = ( withBuyButton ? [GUIHelper getBottomYForView: buyButton] + 5.0 : 5.0 );
+    newFrame.origin.y = [GUIHelper getBottomYForView: buyButton] + 5.0  ;
     packView.frame = newFrame;
-    [self.contentView addSubview: packView];
+   // [self.contentView addSubview: packView];
         
     if ( 0 < [description length] ) {
         CGSize constraintSize, offset;
@@ -473,7 +539,8 @@ static const CGFloat kYellowBgMargin = 5.0;
     }
     
     [button addTarget: self action: @selector(bannerPressed:) forControlEvents: UIControlEventTouchUpInside];
-    
+    button.tag = i++;
+    NSLog(@"iii==%d",i);
     [self.renderedBanners addObject: button];
     [self.contentView addSubview: button];
 }
@@ -483,6 +550,7 @@ static const CGFloat kYellowBgMargin = 5.0;
 
 - (void)bannerPressed: (id)sender
 {
+    NSLog(@"T====%@",(MustachePackView*)sender);
     if ( [sender isKindOfClass: [UIButton class]] ) {
 //        [self.delegate bannerPressedForPack: [[DataModel sharedInstance].packsArray objectAtIndex: [self.renderedBanners indexOfObject: sender] + 1]
 //                               curtainView: self];
@@ -498,6 +566,7 @@ static const CGFloat kYellowBgMargin = 5.0;
 //        [self.delegate bannerPressedForPack: [(MustachePackView*)sender pack] curtainView: self];
 //    }
     else if ( [sender isKindOfClass: [MustachePackView class]] ) {
+        NSLog(@"MustachePackView*)sender==%@",(MustachePackView*)sender);
         [self.delegate buyNowPressedForPack: [(MustachePackView*)sender pack] curtainView: self];
     }
 }
@@ -528,7 +597,7 @@ static const CGFloat kYellowBgMargin = 5.0;
 
 - (void)handleTap: (UITapGestureRecognizer*)sender
 {
-    if ( self.closingTapGesture == sender
+    /*if ( self.closingTapGesture == sender
         && UIGestureRecognizerStateEnded == sender.state ){
         if ( nil != self.closingTarget && nil != self.closingAction ) {
 #pragma clang diagnostic push
@@ -542,18 +611,46 @@ static const CGFloat kYellowBgMargin = 5.0;
             error(@"close target-action not set correctly");
         }
     }
+     */
+    if(pos<90){pos +=3.9999999999999999;
+     [self.contentView scrollRectToVisible:CGRectMake(pos*20, 20, self.self.contentView.frame.size.width, self.self.contentView.frame.size.height) animated:YES];
+    }
+}
+- (void)scrollViewDidScroll:(UIScrollView *)_scrollView{
+    
+    ScrollDirection scrollDirection;
+    if (self.lastContentOffset > self.contentView.contentOffset.x*2){
+        scrollDirection = ScrollDirectionRight;
+        NSLog(@"rigth%f",self.lastContentOffset);
+    }
+    else if (self.lastContentOffset < self.contentView.contentOffset.x){
+        scrollDirection = ScrollDirectionLeft;
+    NSLog(@"Left%f",self.lastContentOffset);
+    
+    self.lastContentOffset = self.contentView.contentOffset.x;
+        
+  //  pos-=3;
+}
+}
+- (void)leftScrollMY: (UITapGestureRecognizer*)sender
+{
+    if(pos>0){pos -=3.99999999999999999;
+        [self.contentView scrollRectToVisible:CGRectMake(pos*20, 20, self.self.contentView.frame.size.width, self.self.contentView.frame.size.height) animated:YES];
+    }
 }
 
 
 - (void)closeWithObject: (id)object
 {
+    NSLog(@"sdsd");
+   
     if ( nil != self.closingTarget && nil != self.closingAction ) {
         MustacheHighlightedButton *highButton;
         
         if ( [object isKindOfClass: [UIButton class]] ) {
             UIButton *button = (UIButton*)object;
             highButton = (MustacheHighlightedButton*)button.superview;
-            
+            NSLog(@"highButton==%d",highButton.tag);
             if ( ![highButton isKindOfClass: [MustacheHighlightedButton class]] ) {
                 error(@"Cannot get staches - highButton is of class: %@", NSStringFromClass([highButton class]));
                 return;

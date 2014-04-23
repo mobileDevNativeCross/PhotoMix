@@ -10,7 +10,7 @@
 
 #import "AppDelegate.h"
 #import "VoilaViewController.h"
-#import "iRate.h"
+//#import "iRate.h"
 #import "Flurry.h"
 #import "DETweetComposeViewController.h"
 #import "UIDevice+DETweetComposeViewController.h"
@@ -19,17 +19,23 @@
 #import "RevMobAds.h"
 #import "YRDropdownView.h"
 #import "vunglepub.h"
+#import "vkLoginViewController.h"
+#import "JSONKit.h"
+#import "VKSdk.h"
 // Sun - add
 #import "GUIHelper.h"
 
 static const NSInteger kFBInvitedUsersCountToGetPack = 5;
 
+static NSArray  * SCOPE = nil;
 
 @interface VoilaViewController ()
 {
     EFacebookAPICall _currentAPICall;
     BOOL _isYRDrodownShown;
     BOOL _isFirstApperance;
+    UIImageView *view;
+    UIButton *button;
 }
 
 @property (strong, nonatomic) UIImageView *imageView;
@@ -70,6 +76,10 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
 
 @implementation VoilaViewController
 
+
+
+//@synthesize api = _api;
+//@synthesize newRequest = _newRequest;
 @synthesize sourceImage = __sourceImage;
 @synthesize imageView = _imageView;
 @synthesize errorAlertView = _errorAlertView;
@@ -82,6 +92,9 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
 @synthesize facebookShareViewNavController = _facebookShareViewNavController;
 //Sun
 @synthesize oriImage = _oriImage;
+@synthesize descriptiontext = _descriptiontext;
+@synthesize firstHeightVoila = _firstHeightVoila;
+@synthesize firstWidhtVoila = _firstWidhtVoila;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -109,51 +122,254 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
 {
     self.view = [[UIView alloc] initWithFrame: [UIScreen mainScreen].applicationFrame];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    NSLog(@"firstHeightVoila==%.3f",_firstHeightVoila);
+    NSLog(@"firstWidthVoila==%.3f",_firstWidhtVoila);
 }
 
+-(void)startWorking
+{
+    
+     [VKSdk authorize:SCOPE];
+    [VKSdk authorize:SCOPE revokeAccess:YES];
+   /* VKRequest * getWall = [VKRequest requestWithMethod:@"wall.get" andParameters:@{VK_API_OWNER_ID : @"-1"} andHttpMethod:@"GET"];
+    
+    VKRequest *request = [VKApi uploadWallPhotoRequest:[UIImage imageNamed:@"back"] parameters:[VKImageParameters pngImage] userId:0 groupId:0];
+    VKRequest * audioReq = [[VKApi users] get];
+   // VKRequest * audioReq = [[VKApi wall]];
+    [audioReq executeWithResultBlock:^(VKResponse * response) {
+        NSLog(@"Json result: %@", response.json);
+    } errorBlock:^(NSError * error) {
+        if (error.code != VK_API_ERROR) {
+            [error.vkError.request repeat];
+        } else {
+            NSLog(@"VK error: %@", error);
+        } 
+    }];*/
+      vkLoginViewController *vk = [[vkLoginViewController alloc] init];
+    self.appID = @"4279535";
+    vk.appID = @"4279535";
+    vk.delegate = self;
+    [self presentModalViewController:vk animated:YES];
+    
+    NSLog(@"doAuth");
+    
+    
+    
+}
+- (void) authComplete {
+   
+    isAuth = YES;
+    NSLog(@"isAuth: %@", isAuth ? @"YES":@"NO");
+    if(!isAuth) return;
+    /*
+     
+     Отправка изображения на стену пользователя происходит в несколько этапов:
+     1. Запрос сервера ВКонтакте для загрузки нашего изображения (photos.getWallUploadServer)
+     2. По полученной ссылке в ответе сервера отправляем изображение методом POST
+     3. Получив в ответе hash, photo, server отправлем команду на сохранение фото на стене (photos.saveWallPhoto)
+     4. Получив в ответе photo id делаем запрос на размещение на стене картинки с помощью wall.post, где в качестве attachment указываем photo id
+     
+     */
+    
+    UIImage *image = self.sourceImage;//[UIImage imageNamed:@"test.jpg"];
+    NSString *user_id = [[NSUserDefaults standardUserDefaults] objectForKey:@"VKAccessUserId"];
+    NSString *accessToken = [[NSUserDefaults standardUserDefaults] objectForKey:@"VKAccessToken"];
+    
+    // Этап 1
+    NSString *getWallUploadServer = [NSString stringWithFormat:@"https://api.vk.com/method/photos.getWallUploadServer?owner_id=%@&access_token=%@", user_id, accessToken];
+    
+    NSDictionary *uploadServer = [self sendRequest:getWallUploadServer withCaptcha:NO];
+    
+    // Получаем ссылку для загрузки изображения
+    NSString *upload_url = [[uploadServer objectForKey:@"response"] objectForKey:@"upload_url"];
+    
+    // Этап 2
+    // Преобразуем изображение в NSData
+    NSData *imageData = UIImagePNGRepresentation(image);
+    
+    NSDictionary *postDictionary = [self sendPOSTRequest:upload_url withImageData:imageData];
+    
+    // Из полученного ответа берем hash, photo, server
+    NSString *hash = [postDictionary objectForKey:@"hash"];
+    NSString *photo = [postDictionary objectForKey:@"photo"];
+    NSString *server = [postDictionary objectForKey:@"server"];
+    
+    // Этап 3
+    // Создаем запрос на сохранение фото на сервере вконтакте, в ответ получим id фото
+    NSString *saveWallPhoto = [NSString stringWithFormat:@"https://api.vk.com/method/photos.saveWallPhoto?owner_id=%@&access_token=%@&server=%@&photo=%@&hash=%@", user_id, accessToken,server,photo,hash];
+    
+    saveWallPhoto = [saveWallPhoto stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];    //вот эту строчку копируйте в свой код
+    
+    NSDictionary *saveWallPhotoDict = [self sendRequest:saveWallPhoto withCaptcha:NO];
+    
+    NSDictionary *photoDict = [[saveWallPhotoDict objectForKey:@"response"] lastObject];
+    NSString *photoId = [photoDict objectForKey:@"id"];
+    
+    // Этап 4
+    // Постим изображение на стену пользователя
+    NSString *postToWallLink = [NSString stringWithFormat:@"https://api.vk.com/method/wall.post?owner_id=%@&access_token=%@&message=%@&attachment=%@", user_id, accessToken, [self URLEncodedString:@"Created with PhotoMix"], photoId];
+    
+    NSDictionary *postToWallDict = [self sendRequest:postToWallLink withCaptcha:NO];
+    NSString *errorMsg = [[postToWallDict  objectForKey:@"error"] objectForKey:@"error_msg"];
+    if(errorMsg) {
+        NSLog(@"ERRRRRRRRRRRRRR");
+    } else {
+        NSLog(@"++++++++++++++++++++++");
+
+    }
+}
+- (NSString *)URLEncodedString:(NSString *)str
+{
+    NSString *result = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
+                                                                           (CFStringRef)str,
+                                                                           NULL,
+																		   CFSTR("!*'();:@&=+$,/?%#[]"),
+                                                                           kCFStringEncodingUTF8));
+   
+	return result;
+}
+- (NSDictionary *) sendRequest:(NSString *)reqURl withCaptcha:(BOOL)captcha {
+    // Если это запрос после ввода капчи, то добавляем в запрос параметры captcha_sid и captcha_key
+    
+    NSLog(@"Sending request0: %@", reqURl);
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:reqURl]
+                                                           cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
+                                                       timeoutInterval:60.0];
+    
+    // Для простоты используется обычный запрос NSURLConnection, ответ сервера сохраняем в NSData
+    NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+    
+    // Если ответ получен успешно, можем его посмотреть и заодно с помощью JSONKit получить NSDictionary
+    if(responseData){
+        NSLog(@"responseData==%@",responseData);
+        NSDictionary *dict = [[JSONDecoder decoder] parseJSONData:responseData];
+        
+        // Если есть описание ошибки в ответе
+        NSString *errorMsg = [[dict objectForKey:@"error"] objectForKey:@"error_msg"];
+        
+        NSLog(@"Server response: %@ \nError: %@", dict, errorMsg);
+        
+        // Если требуется ввод капчи
+        
+        
+        return dict;
+    }
+    return nil;
+}
+- (NSDictionary *) sendPOSTRequest:(NSString *)reqURl withImageData:(NSData *)imageData {
+    NSLog(@"Sending request1: %@", reqURl);
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:reqURl]
+                                                           cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
+                                                       timeoutInterval:60.0];
+    // Устанавливаем метод POST
+    [request setHTTPMethod:@"POST"];
+    
+    // Кодировка UTF-8
+    [request addValue:@"8bit" forHTTPHeaderField:@"Content-Transfer-Encoding"];
+    
+    CFUUIDRef uuid = CFUUIDCreate(nil);
+    NSString *uuidString = (NSString*)CFBridgingRelease(CFUUIDCreateString(nil, uuid)) ;
+    CFRelease(uuid);
+    NSString *stringBoundary = [NSString stringWithFormat:@"0xKhTmLbOuNdArY-%@",uuidString];
+    NSString *endItemBoundary = [NSString stringWithFormat:@"\r\n--%@\r\n",stringBoundary];
+    
+    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data;  boundary=%@", stringBoundary];
+    
+    [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
+    
+    NSMutableData *body = [NSMutableData data];
+    
+    [body appendData:[[NSString stringWithFormat:@"--%@\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[[NSString stringWithString:@"Content-Disposition: form-data; name=\"photo\"; filename=\"photo.jpg\"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"Content-Type: image/jpg\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:imageData];
+    [body appendData:[[NSString stringWithFormat:@"%@",endItemBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    // Добавляем body к NSMutableRequest
+    [request setHTTPBody:body];
+    
+    NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+    NSDictionary *dict;
+    if(responseData){
+        dict = [[JSONDecoder decoder] parseJSONData:responseData];
+        
+        // Если есть описание ошибки в ответе
+        NSString *errorMsg = [[dict objectForKey:@"error"] objectForKey:@"error_msg"];
+        
+        NSLog(@"Server response: %@ \nError: %@", dict, errorMsg);
+        
+        return dict;
+    }
+    return nil;
+}
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    NSLog(@"DESCR-======%@",self.descriptiontext);
+   // self.api = [[Odnoklassniki alloc] initWithAppId:appID andAppSecret:appSecret1 andAppKey:appKey1 andDelegate:self];
+	//if session is still valid
+	//if(self.api.isSessionValid)
+	//	[self okDidLogin];
+//
+      SCOPE = @[VK_PER_FRIENDS, VK_PER_WALL, VK_PER_AUDIO, VK_PER_PHOTOS, VK_PER_NOHTTPS, VK_PER_MESSAGES];
+    [VKSdk initializeWithDelegate:(id)self andAppId:@"4279535"];
+    //if ([VKSdk wakeUpSession])
+    //{
+       // [self startWorking];
+       
+        
+    //}
     
     // create BOTTOM TOOLBAR
     NSMutableArray *buttonsArray = [[NSMutableArray alloc] init];
     //Sun - iPad support
-    NSString *arrLName = @"arrow-L", *fbookName = @"fbook", *twitterName = @"twitter", *emailName = @"email";
-    NSString *saveName = @"save", *instagramName = @"instagram", *homeName = @"home";
+    NSString *arrLName = @"back"/*, *fbookName = @"fbook", *twitterName = @"twitter", *emailName = @"email"*/;
+    NSString *saveName = @"save", *instagramName = @"instagram", *homeName = @"", *next = @"next";
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
         arrLName = @"arrow-L-ipad";
-        fbookName = @"fbook-ipad";
+        /*fbookName = @"fbook-ipad";
         twitterName = @"twitter-ipad";
         emailName = @"email-ipad";
         saveName = @"save-ipad";
         instagramName = @"instagram-ipad";
-        homeName = @"home-ipad";
+        homeName = @"home-ipad"*/;
     }
 
     [buttonsArray addObject: [self buttonWithImageNamed: arrLName target: self action: @selector(goBack:)]];
-    [buttonsArray addObject: [self buttonWithImageNamed: fbookName target: self action: @selector(shareToFacebook:)]];
+    
+   /* [buttonsArray addObject: [self buttonWithImageNamed: fbookName target: self action: @selector(shareToFacebook:)]];
     [buttonsArray addObject: [self buttonWithImageNamed: twitterName target: self action: @selector(shareToTwitter:)]];
     [buttonsArray addObject: [self buttonWithImageNamed: emailName target: self action: @selector(shareByEmail:)]];
     [buttonsArray addObject: [self buttonWithImageNamed: saveName target: self action: @selector(saveToLibrary:)]];
+    
      //Instagram
     [buttonsArray addObject: [self buttonWithImageNamed: instagramName target: self action: @selector(shareIG:)]];
+    */
     [buttonsArray addObject: [self buttonWithImageNamed: homeName target: self action: @selector(startOver:)]];
-    [self createBottomToolbarWithButtons: buttonsArray];
     
-    [[iRate sharedInstance] logEvent: NO];
+    [buttonsArray addObject: [self buttonWithImageNamed: next target: self action: @selector(showSharing:)]];
+    [self createBottomToolbar: buttonsArray];
+    
+   // [[iRate sharedInstance] logEvent: NO];
     
     // IMAGE view
     if ( nil == self.imageView ) {
         self.imageView = [[UIImageView alloc] initWithFrame:
-                          CGRectMake( 0, 0,
-                                     self.view.frame.size.width,
-                                     self.toolbar.frame.origin.y)];
-        
-        self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+                          CGRectMake( 0, self.toolbar.frame.size.height, self.view.frame.size.width, self.view.frame.size.height-self.toolbar.frame.size.height)];//dima
+       // self.imageView.layer.borderWidth = 1;
+      //  self.imageView.layer.borderColor = [UIColor greenColor].CGColor;
+       self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         self.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         self.imageView.image = self.sourceImage;
-        [self.view addSubview: self.imageView];
+        
+        
+        
+         [self.view addSubview: self.imageView];
+        //self.imageView.frame =
+          //                CGRectMake( 0, self.toolbar.frame.size.height, self.view.frame.size.width, self.imageView.frame.size.height-self.toolbar.frame.size.height);
+       
     }
 
     // PRINT ME button
@@ -175,7 +391,7 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
                                      printMeImg.size.height / 2.0 + 10);
 
     [self.printButton addTarget: self action: @selector(sendPostcard:) forControlEvents: UIControlEventTouchUpInside];
-    [self.view addSubview: self.printButton];
+   // [self.view addSubview: self.printButton];
 
     [[NSNotificationCenter defaultCenter] addObserver: self
                                              selector: @selector(closeModalViews:)
@@ -184,6 +400,133 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
 
 }
 
+-(void)showSharing:(id)sender{
+    view  = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+    [view setBackgroundColor:[UIColor blackColor]];//
+    UIImageView *bottom  = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bottom_bar_black.png"]];
+    bottom.frame = CGRectMake(0, 0, 320, 60);
+    
+    UIImageView *backBtn = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"back.png"]];
+    backBtn.frame = CGRectMake(0, 5, 60, 35);
+   
+   
+    
+   
+    
+    UIImageView *doneBtn = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"next.png"]];
+   // backBtn.frame = CGRectMake(0, 5, 60, 35);
+   // [bottom addSubview:backBtn];
+    
+  //  UIImage *buttonImage = [UIImage imageNamed: imageName];
+   // UIImage *buttonPressedImage = [UIImage imageNamed: pressedImageName];
+	
+	button = [UIButton buttonWithType: UIButtonTypeCustom];
+    button.frame = CGRectMake(0, 90, 320, 50);
+    [button setTitle:@"facebook" forState:UIControlStateNormal];
+    button.titleLabel.font = [UIFont systemFontOfSize:24];
+    [button.titleLabel setTextAlignment: NSTextAlignmentRight];
+    button.contentEdgeInsets = UIEdgeInsetsMake(0, 200, 0, 0);
+    
+//////////////////////////////////////////////////////////////////////////////////////////
+   UIButton* instBtn = [UIButton buttonWithType: UIButtonTypeCustom];
+    instBtn.frame = CGRectMake(0, 150, 320, 50);
+    [instBtn setTitle:@"instagram" forState:UIControlStateNormal];
+    instBtn.titleLabel.font = [UIFont systemFontOfSize:24];
+    [instBtn.titleLabel setTextAlignment: NSTextAlignmentRight];
+    instBtn.contentEdgeInsets = UIEdgeInsetsMake(0, 200, 0, 0);
+//////////////////////////////////////////////////////////////////////////////////////////
+    UIButton* twitBtn = [UIButton buttonWithType: UIButtonTypeCustom];
+    twitBtn.frame = CGRectMake(0, 210, 320, 50);
+    [twitBtn setTitle:@"twitter" forState:UIControlStateNormal];
+    twitBtn.titleLabel.font = [UIFont systemFontOfSize:24];
+    [twitBtn.titleLabel setTextAlignment: NSTextAlignmentRight];
+    twitBtn.contentEdgeInsets = UIEdgeInsetsMake(0, 240, 0, 0);
+/////////////////////////////////////////////////////////////////////////////////////////
+    UIButton* saveBtn = [UIButton buttonWithType: UIButtonTypeCustom];
+    saveBtn.frame = CGRectMake(0, 270, 320, 50);
+    [saveBtn setTitle:@"save to photos" forState:UIControlStateNormal];
+    saveBtn.titleLabel.font = [UIFont systemFontOfSize:24];
+    [saveBtn.titleLabel setTextAlignment: NSTextAlignmentRight];
+    saveBtn.contentEdgeInsets = UIEdgeInsetsMake(0, 150, 0, 0);
+/////////////////////////////////////////////////////////////////////////////////////////
+    UIButton* vkBtn = [UIButton buttonWithType: UIButtonTypeCustom];
+    vkBtn.frame = CGRectMake(0, 330, 320, 50);
+    [vkBtn setTitle:@"vkontakte" forState:UIControlStateNormal];
+    vkBtn.titleLabel.font = [UIFont systemFontOfSize:24];
+    [vkBtn.titleLabel setTextAlignment: NSTextAlignmentRight];
+    vkBtn.contentEdgeInsets = UIEdgeInsetsMake(0, 200, 0, 0);
+////////////////////////////////////////////////////////////////////////////////////////
+    UIButton* odnBtn = [UIButton buttonWithType: UIButtonTypeCustom];
+    odnBtn.frame = CGRectMake(0, 390, 320, 50);
+    [odnBtn setTitle:@"odnoklassniki" forState:UIControlStateNormal];
+    odnBtn.titleLabel.font = [UIFont systemFontOfSize:24];
+    [odnBtn.titleLabel setTextAlignment: NSTextAlignmentRight];
+    odnBtn.contentEdgeInsets = UIEdgeInsetsMake(0, 150, 0, 0);
+////////////////////////////////////////////////////////////////////////////////////////
+    /*
+     [buttonsArray addObject: [self buttonWithImageNamed: fbookName target: self action: @selector(shareToFacebook:)]];
+     [buttonsArray addObject: [self buttonWithImageNamed: twitterName target: self action: @selector(shareToTwitter:)]];
+    // [buttonsArray addObject: [self buttonWithImageNamed: emailName target: self action: //@selector(shareByEmail:)]];
+     [buttonsArray addObject: [self buttonWithImageNamed: saveName target: self action: @selector(saveToLibrary:)]];
+     
+     
+     */
+  //  UITapGestureRecognizer *tapOdn = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(shareToOdn:)];
+//    [odnBtn addGestureRecognizer:tapOdn];
+   // [view addSubview:odnBtn];
+    
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(shareToFacebook:)];
+    [button addGestureRecognizer:tap];
+    [view addSubview:bottom];
+    
+    UITapGestureRecognizer *tapInst = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(shareIG:)];
+    [instBtn addGestureRecognizer:tapInst];
+    [view addSubview:instBtn];
+    
+    UITapGestureRecognizer *tapTwit = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(shareToTwitter:)];
+    [twitBtn addGestureRecognizer:tapTwit];
+    [view addSubview:twitBtn];
+
+    
+    UITapGestureRecognizer *tapSave = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(saveToLibrary:)];
+    [saveBtn addGestureRecognizer:tapSave];
+    [view addSubview:saveBtn];
+    
+    UITapGestureRecognizer *closeView = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(closeViewMy:)];
+    [backBtn addGestureRecognizer:closeView];
+   // [view addSubview:saveBtn];
+    UITapGestureRecognizer *vkShare = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(startWorking)];
+    [vkBtn addGestureRecognizer:vkShare];
+    [view addSubview:vkBtn];
+    
+    [view addSubview:button];
+    [view addSubview: backBtn];
+   // [backBtn bringSubviewToFront:bottom];
+    [view setUserInteractionEnabled:YES];
+     [backBtn setUserInteractionEnabled:YES];
+
+    
+    [self.view addSubview:view];
+  //  [view becomeFirstResponder];
+}
+-(void)shareToOdn:(id) sender{
+  //  [self.api authorize:[NSArray arrayWithObjects:@"VALUABLE ACCESS", @"SET STATUS", nil]];
+//    [self.newRequest ]
+    
+    NSString *saveWallPhoto = [NSString stringWithFormat:@"http://api.odnoklassniki.ru/api/photosV2/getUploadUrl?application_key=[Application Key]&sig=[Signature]&session_key=[Session Key]&aid=d7fd39747hd94gd4&count=3%d",2];
+    
+    saveWallPhoto = [saveWallPhoto stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *saveWallPhotoDict = [self sendRequest:saveWallPhoto withCaptcha:NO];
+   // NSLog(@"newRequest===%@",newRequest);
+}
+-(void)closeViewMy:(id)sender{
+    [view removeFromSuperview];
+}
+- (BOOL)prefersStatusBarHidden {
+    
+    return YES;
+}
 
 - (void)viewDidUnload
 {
@@ -209,7 +552,7 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
     [super viewDidAppear: animated];
     
     if ( _isFirstApperance && [[FacebookManager sharedInstance] isFacebookReachable] && ![[DataModel sharedInstance] userHasFreePack]) {
-        [self performSelector:@selector(showFBNotification) withObject:nil afterDelay:0.4];
+       // [self performSelector:@selector(showFBNotification) withObject:nil afterDelay:0.4];
         _isFirstApperance = NO;
     }
 }
@@ -241,8 +584,10 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
         verticalShift = ( _isYRDrodownShown ? 135 : 0);
     }
     
-    return CGPointMake(self.view.frame.size.width - self.printButton.frame.size.width / 2.0 - 6,
-                       self.printButton.frame.size.height / 2.0 + 10 + verticalShift);
+    return CGPointMake(-100,
+                       0);
+    ;//CGPointMake(self.view.frame.size.width - self.printButton.frame.size.width / 2.0 - 6,
+             //          self.printButton.frame.size.height / 2.0 + 10 + verticalShift);
 }
 
 
@@ -263,7 +608,7 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
         fbBanner = @"banner@2x.png";
     }
     view.backgroundImage = [UIImage imageNamed:fbBanner];
-    self.printButton.center = [self centerForPrintButtonWithOrientation: self.interfaceOrientation];
+   // self.printButton.center = [self centerForPrintButtonWithOrientation: self.interfaceOrientation];
     
     [view setTapBlock: ^{
         [self shareToFacebook: nil];
@@ -271,7 +616,7 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
     
     [view setHideBlock: ^{
         _isYRDrodownShown = NO;
-        self.printButton.center = [self centerForPrintButtonWithOrientation: self.interfaceOrientation];
+       // self.printButton.center = [self centerForPrintButtonWithOrientation: self.interfaceOrientation];
     }];
 }
 
@@ -320,6 +665,8 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
     
     self.navigationController.navigationBarHidden = YES;
     [self.navigationController popViewControllerAnimated: YES];
+    
+    
 }
 
 
@@ -348,11 +695,13 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
 {
     [Flurry logEvent: @"PicSaveToLib"];
     CGFloat imageWidth,imageHeight;
-    imageWidth = self.oriImage.size.width;
-    imageHeight = self.oriImage.size.height;
+    imageWidth = self.sourceImage.size.width;
+    imageHeight = self.sourceImage.size.height;
+    
+     NSLog(@"imageWidth0==%f imageHeight0=%f",imageWidth,imageHeight);
     
     // Fixing export to camera roll
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
+  /*  if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
         if([GUIHelper isIPadretina]){
             
             (imageWidth <= 1536 ? imageWidth = 1536 : imageWidth);
@@ -366,30 +715,53 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
         if([GUIHelper isPhone5]){
             (imageWidth <= 640 ? imageWidth = 640 : imageWidth);
             (imageHeight <= 1136 ? imageHeight = 1136 : imageWidth);
+            NSLog(@"imageWidth==%f imageHeight=%f",imageWidth,imageHeight);
         }else{
             (imageWidth <= 320 ? imageWidth = 320 : imageWidth);
             (imageHeight <= 480 ? imageHeight = 480 : imageWidth);
 
         }
     }
+    */
+    if([GUIHelper isPhone5]){
+        (imageWidth <= 640 ? imageWidth = 640 : imageWidth);
+        (imageHeight <= 1136 ? imageHeight = 1136 : imageWidth);
+        NSLog(@"imageWidth==%f imageHeight=%f",imageWidth,imageHeight);
+    }else{
+        (imageWidth <= 320 ? imageWidth = 320 : imageWidth);
+        (imageHeight <= 480 ? imageHeight = 480 : imageWidth);
+        
+    }
+   
+    UIImage *scaledImage = [GUIHelper imageByScalingMY: self.imageView.image toSize: CGSizeMake(imageWidth, imageHeight)];
     
-       
-    UIImage *scaledImage = [GUIHelper imageByScaling: self.imageView.image toSize: CGSizeMake(imageWidth, imageHeight)];
+    
+    
     //return scaledImage;
     
-//    UIImageWriteToSavedPhotosAlbum(self.imageView.image,
-//                                   self,
-//                                   @selector(imageSavedToPhotosAlbum:
-//                                             didFinishSavingWithError:
-//                                             contextInfo:),
-//                                   nil);
+   /* UIImageWriteToSavedPhotosAlbum(self.imageView.image,
+                                   self,
+                                   @selector(imageSavedToPhotosAlbum:                                             didFinishSavingWithError:
+                                             contextInfo:),
+                                  nil);
+     */
+    
+    
+     NSParameterAssert(scaledImage);
     UIImageWriteToSavedPhotosAlbum(scaledImage,
                                    self,
                                    @selector(imageSavedToPhotosAlbum:
                                              didFinishSavingWithError:
                                              contextInfo:),
                                    nil);
+    
 
+   
+  /*  UIImageWriteToSavedPhotosAlbum(self.imageView.image, nil, @selector(imageSavedToPhotosAlbum:
+                                                               didFinishSavingWithError:
+                                                               contextInfo:), nil);
+    
+*/
 }
 
 
@@ -406,7 +778,7 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
         [self.errorAlertView show];
     }
     else {
-        self.successAlertView = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Stachebashed!", @"Successful Save to photo album - alert title")
+        self.successAlertView = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"PhotoMix!", @"Successful Save to photo album - alert title")
                                                         message: NSLocalizedString(@"Your picture was saved successfully.", @"Successful Save to photo album - alert text")
                                                        delegate: nil
                                               cancelButtonTitle: NSLocalizedString(@"Dismiss", @"")
@@ -918,12 +1290,49 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
     NSURL *instagramURL = [NSURL URLWithString:@"instagram://app"];
     if ([[UIApplication sharedApplication] canOpenURL:instagramURL])
     {
+        
+      
+        
+        
+        NSString* imagePath1 = [NSString stringWithFormat:@"%@/instagramShare.igo", [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject]];
+        [[NSFileManager defaultManager] removeItemAtPath:imagePath1 error:nil];
+        
+        
+        
+        
+       
+       
+        
+        UIImage *scaledImage = [GUIHelper ScalingForIG: self.imageView.image toSize: CGSizeMake(612, 612)];
+        
+        UIImage *backgroundImage = [UIImage imageNamed:@"placeForPict.png"];
+        
+        UIImage * test =    [VoilaViewController mergeImage:backgroundImage withImage:scaledImage];
+        
+        
+        
+        UIImage *instagramImage = scaledImage;//[UIImage imageNamed:@"scroll.png"];
+        [UIImagePNGRepresentation(instagramImage) writeToFile:imagePath1 atomically:YES];
+        NSLog(@"Image Size >>> %@", NSStringFromCGSize(instagramImage.size));
+        //[self.view addSubview:];
+       // self.imageView.image = instagramImage;
+        self.docController=[UIDocumentInteractionController interactionControllerWithURL:[NSURL fileURLWithPath:imagePath1]];
+        self.docController.delegate = self;
+        self.docController.UTI = @"com.instagram.exclusivegram";
+     
+        [self.docController presentOpenInMenuFromRect: self.view.frame inView:self.view animated:YES ];
+        
+        /*
+        
+        
+        
+        
         UIImage* instaImage = self.imageView.image;
         NSString* imagePath = [NSString stringWithFormat:@"%@/image.igo", [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject]];
         [[NSFileManager defaultManager] removeItemAtPath:imagePath error:nil];
         [UIImagePNGRepresentation(instaImage) writeToFile:imagePath atomically:YES];
         NSLog(@"image size: %@", NSStringFromCGSize(instaImage.size));
-        //_docController = [UIDocumentInteractionController interactionControllerWithURL:[NSURL fileURLWithPath:imagePath]]; //bug
+        
         //fixed
         self.docController = [UIDocumentInteractionController interactionControllerWithURL:[NSURL fileURLWithPath:imagePath]];
         _docController.delegate=self;
@@ -940,7 +1349,7 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
             [_docController presentOpenInMenuFromRect:self.view.frame inView:self.view animated:YES];
         }
 
-        
+        */
     }
     else
     {
@@ -954,6 +1363,75 @@ static const NSInteger kFBInvitedUsersCountToGetPack = 5;
         
         
     }
+}
+/*+ (UIImage*)mergeImage:(UIImage*)first withImage:(UIImage*)second
+{
+    // get size of the first image
+    CGImageRef firstImageRef = first.CGImage;
+    CGFloat firstWidth = CGImageGetWidth(firstImageRef);
+    CGFloat firstHeight = CGImageGetHeight(firstImageRef)+77;
+    
+    // get size of the second image
+    CGImageRef secondImageRef = second.CGImage;
+    CGFloat secondWidth = CGImageGetWidth(secondImageRef)/2;
+    CGFloat secondHeight = CGImageGetHeight(secondImageRef)/2;
+    
+    // build merged size
+    CGSize mergedSize = CGSizeMake(MAX(firstWidth, secondWidth), MAX(firstHeight+secondHeight*4.2, secondHeight));
+    
+    // capture image context ref
+    UIGraphicsBeginImageContext(mergedSize);
+    
+    //Draw images onto the context
+    [first drawInRect:CGRectMake(0, 0, firstWidth, firstHeight)];
+    [second drawInRect:CGRectMake(0, 0, secondWidth, secondHeight)];
+   // firstHeightVoila = firstHeight;
+    //firstWidthVoila  = firstWidth;
+    // assign context to new UIImage
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    // end context
+    UIGraphicsEndImageContext();
+    
+    return newImage;
+}
+ */
+
++ (UIImage*)mergeImage:(UIImage*)first withImage:(UIImage*)second
+ {
+ // get size of the first image
+ CGImageRef firstImageRef = first.CGImage;
+ CGFloat firstWidth = CGImageGetWidth(firstImageRef);
+ CGFloat firstHeight = CGImageGetHeight(firstImageRef);
+ 
+ // get size of the second image
+ CGImageRef secondImageRef = second.CGImage;
+ CGFloat secondWidth = CGImageGetWidth(secondImageRef);
+ CGFloat secondHeight = CGImageGetHeight(secondImageRef);
+ 
+ // build merged size
+ CGSize mergedSize = CGSizeMake(MAX(firstWidth, secondWidth), MAX(firstHeight, secondHeight));
+ 
+ // capture image context ref
+ UIGraphicsBeginImageContext(mergedSize);
+ 
+ //Draw images onto the context
+ [first drawInRect:CGRectMake(0, 0, firstWidth, firstHeight)];
+ [second drawInRect:CGRectMake(0, 0, secondWidth, secondHeight)];
+ 
+ // assign context to new UIImage
+ UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+ 
+ // end context
+ UIGraphicsEndImageContext();
+ 
+ return newImage;
+ }
+
+- (UIDocumentInteractionController *) setupControllerWithURL: (NSURL*) fileURL usingDelegate: (id <UIDocumentInteractionControllerDelegate>) interactionDelegate {
+    UIDocumentInteractionController *interactionController = [UIDocumentInteractionController interactionControllerWithURL: fileURL];
+    interactionController.delegate = interactionDelegate;
+    return interactionController;
 }
 
 

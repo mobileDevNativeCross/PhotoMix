@@ -76,7 +76,7 @@ static const NSInteger kFBInvitedUsersCount = 5;
     }
     return self;
 }
-
+-(BOOL)prefersStatusBarHidden {   return YES; }
 
 - (void)didReceiveMemoryWarning
 {
@@ -204,7 +204,7 @@ static const NSInteger kFBInvitedUsersCount = 5;
                              buttonImage.size.width, buttonImage.size.height);
 	
     [button addTarget: self action: @selector(pickFriendsButtonClick:) forControlEvents: UIControlEventTouchUpInside];
-    [self.view addSubview: button];
+    //[self.view addSubview: button];
 
     self.selectedFriendsArray = [NSMutableArray array];
     if ([DataModel sharedInstance].currentFBFriend != nil)
@@ -253,9 +253,10 @@ static const NSInteger kFBInvitedUsersCount = 5;
 - (void)createNavBar
 {
     [super createNavBar];
-    [self createLeftNavBarButtonWithTitle: NSLocalizedString(@"Cancel", @"Nab bar button") target: self action: @selector(cancel:)];
-    [self createRightNavBarButtonWithTitle: NSLocalizedString(@"Share", @"Nab bar button") target: self action: @selector(share:)];
-    [self createNavBarTitleWithText: NSLocalizedString(@"Share to facebook", @"Facebook sharing screen Nav bar title")];
+    [self createLeftNavBarButtonWithTitle: NSLocalizedString(@"", @"Nab bar button") target: self action: @selector(cancel:)];
+    [self createRightNavBarButtonWithTitle: NSLocalizedString(@"share", @"Nab bar button") target: self action: @selector(share:)];
+    [self createNavBarTitleWithText: NSLocalizedString(@"", @"Facebook sharing screen Nav bar title")];
+    
 }
 
 
@@ -517,7 +518,7 @@ static const NSInteger kFBInvitedUsersCount = 5;
         [Flurry logEvent: @"DidShareImageToFB"];
         [self hideActivityIndicator];
         if ([[DataModel sharedInstance] userHasFreePack]){
-            self.successAlert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Stachebashed!", @"Facebook alert title")
+            self.successAlert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"PhotoMix!", @"Facebook alert title")
                                                            message: NSLocalizedString(@"Your picture was posted successfully.", @"Facebook alert notification text")
                                                           delegate: self
                                                  cancelButtonTitle:@"Dismiss"
@@ -530,14 +531,14 @@ static const NSInteger kFBInvitedUsersCount = 5;
             
             if (invitedFriends == 0)
                 invitedFriends = kFBInvitedUsersCount;
-            self.successAlert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Stachebashed!", @"Facebook alert title")
+            self.successAlert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"PhotoMix!", @"Facebook alert title")
                                                        message: [NSString stringWithFormat: NSLocalizedString(@"Your picture was posted successfully. Invite %d friends and get a Secret pack!", @"Your picture was posted successfully. Invite up to 20 friends and get a Secret pack!"), invitedFriends]
                                                       delegate: self
                                              cancelButtonTitle:NSLocalizedString (@"Later", @"Later FB friend alert button")
                                              otherButtonTitles:NSLocalizedString (@"Invite!" , @"Invite FB friend alert button"), nil];
 
         }
-        [self.successAlert show];
+     //   [self.successAlert show];
     }
     
 }

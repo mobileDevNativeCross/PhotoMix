@@ -20,13 +20,30 @@
 #import "DMStache.h"
 #import "MAKVONotificationCenter.h"
 #import "FlurryAds.h"
+//admob
+#import "GADBannerView.h"
+#import "GADRequest.h"
+#import "appID.h"
+ #import "CaptureView.h"
 
-
-#define FLURRY_AD_SPACE @"MB Free Banner" 
+#define FLURRY_AD_SPACE @"MB Free Banner"
 
 static NSString *kTsaiclipBaseName = @"tie-clip";
 
-@interface PictureViewController ()
+@interface PictureViewController (){
+    BOOL isDragging;
+    CGPoint touchLocationMY;
+    BOOL touchesEnded;
+    NSUserDefaults * defs;
+    NSString * valueForAppPurchase;
+    float textFieldYpos;
+    NSString *descriptionStr;
+    UIImage *resIm;
+    CaptureView *cloneView;
+    float firstHeightVoila;
+    float firstWidthVoila;
+    UIImageView *myDescrView;
+}
 
 // Sun add
 @property (strong, nonatomic) UIImage *originalImage;
@@ -122,6 +139,9 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 - (void)closeMustacheCurtain: (id)sender;
 - (void)changeCurrentStacheWithImageArray: (NSArray*)imagesArray stache: (DMStache*)stache;
 - (StacheView*)addNewStacheToViewWithImageArray: (NSArray*)imagesArray stache: (DMStache*)stache;
+
+- (StacheView*)addNewStacheToViewWithImageArrayPurchase: (NSArray*)imagesArray stache: (DMStache*)stache;
+
 - (void)removeStache: (id)sender;
 
 - (void)addColorIndicator;
@@ -163,7 +183,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 
 - (void)disableActiveMustache;
 
-@end 
+@end
 
 
 @implementation PictureViewController
@@ -175,8 +195,17 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     
     id<MAKVOObservation> _mustachesCountObservation;
     UIView *_flurryAdContainerView;
+    UIView *PlaceHoldView;
+    MustacheHighlightedButton* highButton2;
+    
+    UITextView *addDescr;
+   
 }
 
+
+//adMob
+@synthesize bannerView = bannerView_;
+//
 @synthesize sourceImage = __sourceImage;
 @synthesize imageView = _imageView;
 @synthesize stachesArray = _stachesArray;
@@ -257,7 +286,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 
 
 - (void)setSourceImage: (UIImage*)image
-{    
+{
     if ( image != __sourceImage ) {
         self.originalImage = image;
         __sourceImage = [self scaleToProductionImage: image];
@@ -269,18 +298,55 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
         // calculate scaled rect for source image for stached image cropping
         self.sourceImageSize = __sourceImage.size;
         CGFloat xScaleFactor = self.view.frame.size.width / self.sourceImageSize.width;
-        CGFloat yScaleFactor = self.toolbar.frame.origin.y / self.sourceImageSize.height;
+        CGFloat yScaleFactor = (self.imageView.frame.size.height / self.sourceImageSize.height);
         self.originalScaleFactor = MIN(xScaleFactor, yScaleFactor);
+        NSLog(@"originalScaleFactor==%f",self.originalScaleFactor);
+        NSLog(@"xScaleFactor==%f",xScaleFactor);
+        
+        NSLog(@"originalScaleFactor==%f",self.originalScaleFactor);
         
         CGRect scaledRect = CGRectZero;
         scaledRect.size = CGSizeMake(floor(self.sourceImageSize.width * self.originalScaleFactor),
                                      floor(self.sourceImageSize.height * self.originalScaleFactor));
-        scaledRect.origin = CGPointMake(self.imageView.center.x - 0.5 * scaledRect.size.width, self.imageView.center.y - 0.5 * scaledRect.size.height);
+        scaledRect.origin = CGPointMake(self.imageView.center.x - 0.5 * scaledRect.size.width, (self.imageView.frame.size.height-scaledRect.size.height)/2);
+        
+        if (![MKStoreManager featureAPurchased]|| ![MKStoreManager featureAPurchased]){
+            addDescr = [[UITextView alloc] initWithFrame:CGRectMake(self.imageView.center.x - 0.5 * scaledRect.size.width, /*self.view.frame.size.height-80*/468, floor(self.sourceImageSize.width * self.originalScaleFactor),
+                                                                    50)];
+            myDescrView = [[UIImageView alloc] initWithFrame:CGRectMake(self.imageView.center.x - 0.5 * scaledRect.size.width, self.view.frame.size.height-80, floor(self.sourceImageSize.width * self.originalScaleFactor),
+                                                                                     50)];
+           // [myDescrView setBackgroundColor:[UIColor redColor]];
+        }
+        else
+        {
+            addDescr = [[UITextView alloc] initWithFrame:CGRectMake(self.imageView.center.x - 0.5 * scaledRect.size.width, self.view.frame.size.height-20, floor(self.sourceImageSize.width * self.originalScaleFactor),
+                                                                   40)];
+        }
+               addDescr.textContainer.maximumNumberOfLines = 3;
+        addDescr.tintColor = addDescr.backgroundColor;
+          cloneView = [[CaptureView alloc] initWithView:addDescr];
+        addDescr.text = @"Добавить текст";
+        NSLog(@"addDescr=YY=%f",self.view.frame.size.height-80);
+       
+        
+      
+        
+        // eventually, to see it...
+        _myCapt = nil;
+        // _myCapt = [[UIImage alloc]init];
+        _myCapt = cloneView.imageCapture;
+        
+        myDescrView.image = _myCapt;
+         [self.view addSubview:addDescr];
+        //[self.view addSubview:myDescrView];
+        [addDescr setDelegate:self];
         
         self.sourceImageScaledRect = scaledRect;
         if ( nil == self.scaledPicView ) {
             self.scaledPicView = [[UIView alloc] initWithFrame: self.sourceImageScaledRect];
             self.scaledPicView.backgroundColor = [UIColor clearColor];//[[UIColor redColor] colorWithAlphaComponent: 0.3];
+           // self.scaledPicView.layer.borderWidth = 1;
+            //self.scaledPicView.layer.borderColor  = [UIColor greenColor].CGColor;
             [self.imageView addSubview: self.scaledPicView];
         }
     }
@@ -377,7 +443,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     [MBProgressHUD hideHUDForView: self.view animated: YES];
     
     if ( 0 < [_faceFeaturesArray count] ) {
-        [Flurry logEvent: @"FaceDetected" withParameters: @{ @"count" : [NSString stringWithFormat: @"%d", [_faceFeaturesArray count]] }];
+        //[Flurry logEvent: @"FaceDetected" withParameters: @{ @"count" : [NSString stringWithFormat: @"%d", [_faceFeaturesArray count]] }];
         [self dropMustaches];
     }
     
@@ -404,13 +470,13 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
         
         int rndTrigger = arc4random() % 2;
         if ( idx % 2 ) {
-            [self addStacheForFeature: ff withIndex: idx trigger: rndTrigger];
+            //  [self addStacheForFeature: ff withIndex: idx trigger: rndTrigger];
         }
         else {
-            [self addStacheForFeature: ff withIndex: idx trigger: !rndTrigger];
+            //[self addStacheForFeature: ff withIndex: idx trigger: !rndTrigger];
         }
         
-        [self addGlassesForFeature: ff withIndex: idx];
+        //        [self addGlassesForFeature: ff withIndex: idx];
         idx++;
         
 #if DEBUG_FACES
@@ -466,8 +532,15 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
         error(@"idx is out of bounds [0 .. %d]", [freePack.staches count]);
         return nil;
     }
+    DMStache *stache;
+    @try {
+        stache = [freePack.staches objectAtIndex: idx];
+    }
+    @catch (NSException *exception) {
+        
+    }
     
-    DMStache *stache = [freePack.staches objectAtIndex: idx];
+    
     NSArray *imagesArray = [freePack imagesForStaches: stache];
     
     StacheView *stacheView = [self addNewStacheToViewWithImageArray: imagesArray stache: stache];
@@ -485,7 +558,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
         
         StacheView *stacheView = [self addFreeMustacheWithIndex: 1];
         
-        CGFloat mustacheScale = scaledFaceRect.size.width * 1.0 / stacheView.bounds.size.width;
+        CGFloat mustacheScale = 2;//scaledFaceRect.size.width * 1.0 / stacheView.bounds.size.width;
         [stacheView scaleTo: mustacheScale];
         
         CGPoint adjustedMouthPoint = scaledMouthPoint;
@@ -626,49 +699,131 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 {
     NSMutableArray *buttonsArray = [[NSMutableArray alloc] init];
     //Sun - iPad support
-    NSString *arrL = @"arrow-L", *recycleName = @"recycle", *plusName = @"plus", *mustacheName = @"mustache";
-    NSString *basketName = @"basket", *shareName = @"share1";
+    NSString *arrL = @"back"/*, *plusName = @"recycle" ,mustacheName = @"mustache"*/;
+    NSString *recycleName = @"recycle", *shareName = @"next";
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-        arrL = @"arrow-L-ipad";
-        recycleName = @"recycle-ipad";
-        plusName = @"plus-ipad";
-        mustacheName = @"mustache-ipad";
-        basketName = @"basket-ipad";
-        shareName = @"share1-ipad";
+        arrL = @"back";
+        
+       /* plusName = @"plus";*/
+        /* mustacheName = @"mustache-ipad";*/
+         recycleName = @"recycle-ipad";
+        shareName = @"next";
     }
+    
     [buttonsArray addObject: [self buttonWithImageNamed: arrL target: self action: @selector(goBack:)]];
+    
+    //[buttonsArray addObject: [self buttonWithImageNamed: recycleName target: self action: @selector(removeStache:)]];
     
     self.recycleButton = (HighlightedButton*)[self buttonWithImageNamed: recycleName target: self action: @selector(removeStache:)];
     [buttonsArray addObject: self.recycleButton];
     
-    self.addMustacheButton = (HighlightedButton*)[self buttonWithImageNamed: plusName target: self action: @selector(addStache:)];
-    [buttonsArray addObject: self.addMustacheButton];
-    
-    self.changeMustacheButton = (HighlightedButton*)[self buttonWithImageNamed: mustacheName target: self action: @selector(addStache:)];
-    [buttonsArray addObject: self.changeMustacheButton];
+  
     
 #ifndef MB_LUXURY
-    [buttonsArray addObject: [self buttonWithImageNamed: basketName target: self action: @selector(buyStache:)]];
+    //  [buttonsArray addObject: [self buttonWithImageNamed: basketName target: self action: @selector(buyStache:)]];
 #endif
     
     [buttonsArray addObject: [self buttonWithImageNamed: shareName target: self action: @selector(goVoila:)]];
     
-    [self createBottomToolbarWithButtons: buttonsArray];
+    [self createBottomToolbar: buttonsArray];
 }
 
-
+- (BOOL)prefersStatusBarHidden {
+    
+    return YES;
+}
+//admob request
+-(GADRequest *)createReques{
+    GADRequest *request = [GADRequest request];
+    // request.testDevices = [NSArray arrayWithObjects:GAD_SIMULATOR_ID,GAD_SIZE_320x50, nil];
+    return request;
+}
+-(NSString *)tP{
+    detectIphoneVersion *te = [detectIphoneVersion new];
+    return    [te deviceModelName ];
+}
+-(void)adViewDidReceiveAd:(GADBannerView *)adView
+{
+    NSLog(@"AD resived==%hhd",[MKStoreManager featureAPurchased]);
+    if (![MKStoreManager featureAPurchased]|| ![MKStoreManager featureAPurchased]){ // если не куплена фича 1
+    [UIView animateWithDuration:1.0 animations:^{
+       // adView.layer.borderColor  = [UIColor redColor].CGColor;
+        //adView.layer.borderWidth  = 1;
+        
+        if([[self tP] isEqualToString:@"iPhone4"]){
+           adView.frame = CGRectMake(0, 415,adView.frame.size.width,adView.frame.size.height);
+        }
+        else{
+           adView.frame = CGRectMake(0, 515,adView.frame.size.width,adView.frame.size.height);
+        }
+     //   [self.view bringSubviewToFront:adView];
+       // [self.toolbar sendSubviewToBack:self.mustacheCurtainView];
+    }];
+    }
+}
+-(void)adView:(GADBannerView *)view didFailToReceiveAdWithError:(GADRequestError *)error{
+    NSLog(@"AD not resived");
+}
+-(void)removeBannerView{
+    [self.bannerView removeFromSuperview];
+}
+- (BOOL)useEmbeddedWebView
+{
+    return YES;
+}
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    descriptionStr = [[NSString alloc]init];
+    [MKStoreManager sharedManager].delegate = self;
+    //admob
+    self.bannerView = [[GADBannerView alloc] initWithFrame:CGRectMake(0, -700, GAD_SIZE_320x50.width, GAD_SIZE_320x50.height)];
+    //self.bannerView.layer.borderColor = [UIColor redColor].CGColor;
+    // self.bannerView.layer.borderWidth = 1;
+    
+    self.bannerView.adUnitID = MyAdUnitID;
+    self.bannerView.delegate = self;
+    [self.bannerView setRootViewController:self];
+    
+    [self.view addSubview:self.bannerView];
+    [self.bannerView loadRequest:[self createReques]];
+    //
+    
+    [UIApplication sharedApplication].statusBarHidden = YES;
     debug(@"self.view.frame: %@", NSStringFromCGRect(self.view.frame));
     
     // create BOTTOM TOOLBAR
     [self createToolBar];
+    [self.view bringSubviewToFront:self.toolbar];
+    [self.toolbar sendSubviewToBack:self.mustacheCurtainView];
+    //self.toolbar.layer.borderWidth = 1;
+   // self.toolbar.layer.borderColor  = [UIColor redColor].CGColor;
+
     
     // create IMAGE VIEW
-    self.imageView = [[UIImageView alloc] initWithFrame:
-                      CGRectMake( 0, 0, self.view.frame.size.width, self.toolbar.frame.origin.y)];
-    self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    if (![MKStoreManager featureAPurchased]|| ![MKStoreManager featureAPurchased]){
+        if([[self tP] isEqualToString:@"iPhone4"]){
+            self.imageView = [[UIImageView alloc] initWithFrame:
+                              CGRectMake( 0, self.toolbar.frame.size.height, self.view.frame.size.width, self.view.frame.size.height-(self.toolbar.frame.size.height-5)*2-40)];
+            
+        }
+        else
+            self.imageView = [[UIImageView alloc] initWithFrame:
+                              CGRectMake( 0, self.toolbar.frame.size.height, self.view.frame.size.width, self.view.frame.size.height-(self.toolbar.frame.size.height-5)*2-40)];
+    }
+    else{
+        self.imageView = [[UIImageView alloc] initWithFrame:
+                          CGRectMake( 0, self.toolbar.frame.size.height, self.view.frame.size.width, self.view.frame.size.height-70)];
+        
+    }
+    
+    
+    
+    
+    
+    
+    // _imageView.backgroundColor = [UIColor redColor];
+     self.imageView.contentMode = UIViewContentModeScaleAspectFit;
     self.imageView.image = self.sourceImage;
     self.imageView.userInteractionEnabled = YES;
     self.imageView.clipsToBounds = YES;
@@ -681,7 +836,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     [self setMustacheBarButtonsEnabled: NO];
     
     // create HELP button
-    //Sun - ipad support 
+    //Sun - ipad support
     NSString *helpName = @"help";
     NSString *helpPressName = @"help-pressed";
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
@@ -703,10 +858,10 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
         self.highHelpButtonCenterNoBanner = CGPointMake(17, 20);
         self.highHelpButtonCenterWithBanner = CGPointMake(17, 20 + 45.0);
     }
-   
+    
     self.highHelpButton.center = self.highHelpButtonCenterNoBanner;
     
-    [self.view addSubview: self.highHelpButton];
+    //  [self.view addSubview: self.highHelpButton];
     
     // create DOLLAR button
     UIButton *dollarButton = [self plainButtonWithImageNamed: @"dollar"
@@ -723,7 +878,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     
     self.highDollarButton.center = self.highDollarButtonCenterNoBanner;
     
-    [self.view addSubview: self.highDollarButton];
+    // [self.view addSubview: self.highDollarButton];
     
     
     // create REMOVE BANNER Ad button
@@ -732,13 +887,13 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     self.removeBannerAdButton = [UIButton buttonWithType: UIButtonTypeCustom];
     NSString *redXname = @"RedXButton.png";
     CGFloat redW = 30, redH = 30;
-
+    
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
         redXname = @"RedXButton-ipad.png";
         redW = 60,redH = 60;
     }
     UIImage *closeImage = [UIImage imageNamed: redXname];
-    self.removeBannerAdButton.frame = CGRectMake(0, 0, redW, redH);
+    self.removeBannerAdButton.frame = CGRectMake(0, self.view.frame.size.height-redH, redW, redH);
     [self.removeBannerAdButton setImage: closeImage forState: UIControlStateNormal];
     [self.removeBannerAdButton addTarget: self action: @selector(removeBanner:) forControlEvents: UIControlEventTouchUpInside];
 #endif
@@ -766,54 +921,56 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     
 #if NAG_SCREENS_ON
     
-//    if ( [DataModel sharedInstance].shouldShowBannerAds ) {
-//        self.mobclixAdView = [[MobclixAdViewiPhone_320x50 alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 320.0f, 50.0f)];
-//        self.mobclixAdView.delegate = self;
-//        [self.view addSubview: self.mobclixAdView];
-//        
-//        [self subscribeToMobclixBannerKVO];
-//    }
+    //    if ( [DataModel sharedInstance].shouldShowBannerAds ) {
+    //        self.mobclixAdView = [[MobclixAdViewiPhone_320x50 alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 320.0f, 50.0f)];
+    //        self.mobclixAdView.delegate = self;
+    //        [self.view addSubview: self.mobclixAdView];
+    //
+    //        [self subscribeToMobclixBannerKVO];
+    //    }
     
     if ( [DataModel sharedInstance].shouldShowBannerAds ) {
         debug(@"showing Flurry banners");
         
-        [FlurryAds setAdDelegate: self];
-        [self subscribeToFlurryBannerKVO];
+     //   [FlurryAds setAdDelegate: self];
+      //  [self subscribeToFlurryBannerKVO];
         
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-            _flurryAdContainerView = [[UIView alloc] initWithFrame: CGRectMake(0, 0, 768, 66)];
+           // _flurryAdContainerView = [[UIView alloc] initWithFrame: CGRectMake(0, 0, 768, 66)];
             
         }else
         {
-            _flurryAdContainerView = [[UIView alloc] initWithFrame: CGRectMake(0.0, 0.0, 320.0, 50.0)];
+            //_flurryAdContainerView = [[UIView alloc] initWithFrame: CGRectMake(0.0, 0.0, 320.0, 50.0)];
         }
-
-        [self.view addSubview: _flurryAdContainerView];
+        
+        //  [self.view addSubview: _flurryAdContainerView];
     }
     
     if ( [DataModel sharedInstance].shouldShowBannerAds ) {
         
         if ( nil == [RevMobAds session] ) {
             debug(@"initializing rev mob");
-            [RevMobAds startSessionWithAppID: [DataModel sharedInstance].revMobFullscreenAppId];
+          //  [RevMobAds startSessionWithAppID: [DataModel sharedInstance].revMobFullscreenAppId];
         }
         
         //self.revMobBannerView = [[RevMobAds session] bannerView];
-        self.revMobBannerView = [[RevMobAds session] bannerViewWithPlacementId: REVMOB_BANNER_ID];
-                                 // @"5156fc9b26a2bb1200000051"];
-        self.revMobBannerView.delegate = self;
-        [self.revMobBannerView loadAd];
+      //  self.revMobBannerView = [[RevMobAds session] bannerViewWithPlacementId: REVMOB_BANNER_ID];
+        // @"5156fc9b26a2bb1200000051"];
+        //self.revMobBannerView.delegate = self;
+        //[self.revMobBannerView loadAd];
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ){
-            [self.revMobBannerView setFrame:CGRectMake(0, 0, 768, 66)];
+          //  [self.revMobBannerView setFrame:CGRectMake(0, 0, 768, 66)];
             
         }else
         {
-            [self.revMobBannerView setFrame:CGRectMake(0, 0, 320, 50)];
+            
+           
+        //    [self.revMobBannerView setFrame:CGRectMake(0, /*self.view.frame.size.height-self.toolbar.frame.size.height*/500, 320, 70)];//dima
         }
         
-        [self.view addSubview: self.revMobBannerView];
+       // [self.view addSubview: self.revMobBannerView];
         
-        [self subscribeToRevMobBannerKVO];
+    //    [self subscribeToRevMobBannerKVO];
     }
     
 #endif
@@ -822,9 +979,93 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     if ( nil != CIDetector ) {  // iOS5.0
         _faceDetector = [CIDetector detectorOfType:CIDetectorTypeFace context:nil options:@{ CIDetectorAccuracy : CIDetectorAccuracyHigh }];
     }
+   
+    
 }
 
+-(void)textViewDidBeginEditing:(UITextView *)textField {
+    if ([textField.text isEqualToString:@"Добавить текст"]) {
+        textField.text = @"";
+        textField.textColor = [UIColor blackColor]; //optional
+    }
+    
+   
+    NSLog(@"Hello==%f",textField.frame.origin.y);
+    textFieldYpos = textField.frame.origin.y;
+    [UIView animateWithDuration:0.6
+                          delay:0.0
+                        options:UIViewAnimationOptionCurveEaseOut
+                     animations:^{
+                         textField.frame = CGRectMake(textField.frame.origin.x, textField.frame.origin.y-170, textField.frame.size.width, textField.frame.size.height);
+                                              }
+                     completion:^(BOOL finished) {
+                     }];
 
+
+    //
+   // return YES;
+}
+-(BOOL)textViewShouldEndEditing:(UITextView *)textView{
+      NSLog(@"Hello2");
+   
+    
+    if(textView.text.length==0)
+    textView.text = @"Добавить текст";
+    descriptionStr  = textView.text;
+    [UIView animateWithDuration:0.6
+                          delay:0.0
+                        options:UIViewAnimationOptionCurveEaseOut
+                     animations:^{
+                         textView.frame = CGRectMake(textView.frame.origin.x, textFieldYpos-2, textView.frame.size.width, textView.frame.size.height);
+                     }
+                     completion:^(BOOL finished) {
+                        
+                     }];
+    /*CaptureView *cloneView = [[CaptureView alloc] initWithView:textView];
+    cloneView.layer.borderColor  = [UIColor greenColor].CGColor;
+    cloneView.backgroundColor = [UIColor greenColor];
+    cloneView.layer.borderWidth  = 1;
+    //  [self.view addSubview:cloneView];// eventually, to see it...
+    
+    myCapt = cloneView.imageCapture;
+    
+    UIImage *soIm  = [self exportStachedImage];
+    resIm  = [self mergeImage:soIm withImage:myCapt];
+     */
+    // [textField becomeFirstResponder];
+       return YES;
+}
+- (UIImage*)mergeImage:(UIImage*)first withImage:(UIImage*)second
+{
+    // get size of the first image
+    CGImageRef firstImageRef = first.CGImage;
+    CGFloat firstWidth = CGImageGetWidth(firstImageRef);
+    CGFloat firstHeight = CGImageGetHeight(firstImageRef)+77;
+    
+    // get size of the second image
+    CGImageRef secondImageRef = second.CGImage;
+    CGFloat secondWidth = CGImageGetWidth(secondImageRef)/2;
+    CGFloat secondHeight = CGImageGetHeight(secondImageRef)/2;
+    
+    // build merged size
+    CGSize mergedSize = CGSizeMake(MAX(firstWidth, secondWidth), MAX(firstHeight+secondHeight*4.2, secondHeight));
+    
+    // capture image context ref
+    UIGraphicsBeginImageContext(mergedSize);
+    
+    //Draw images onto the context
+    [first drawInRect:CGRectMake(0, 0, firstWidth, firstHeight)];
+    [second drawInRect:CGRectMake(0, firstHeight-5, firstWidth, addDescr.frame.size.height*2)];
+    firstHeightVoila = firstHeight;
+    firstWidthVoila  = firstWidth;
+    // assign context to new UIImage
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    // end context
+    UIGraphicsEndImageContext();
+    
+    return newImage;
+}
 - (void)setMustacheBarButtonsEnabled: (BOOL)enabled
 {
     self.recycleButton.button.enabled = enabled;
@@ -859,9 +1100,9 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     
     [DataModel sharedInstance].purchaseDelegate = nil;
     
-    [self unsubscribeFromMobclixBannerKVO];
-    [self unsubscribeFromRevMobBannerKVO];
-    [self unsubscribeFromFlurryBannerKVO];
+    //[self unsubscribeFromMobclixBannerKVO];
+    //[self unsubscribeFromRevMobBannerKVO];
+   // [self unsubscribeFromFlurryBannerKVO];
 }
 
 
@@ -880,7 +1121,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     if ( UIInterfaceOrientationIsPortrait(self.interfaceOrientation) ) {
         [self addMobclixAd];
         //[self addRevMobBanner];
-        [self addFlurrybBanner];
+       // [self addFlurrybBanner];
     }
     
     [DataModel sharedInstance].purchaseDelegate = self;
@@ -891,9 +1132,9 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 {
 	[super viewWillDisappear: animated];
     
-    [self removeMobclixAd];
-    [self removeRevMobBanner];
-    [self removeFlurryBanner];
+    //[self removeMobclixAd];
+  //  [self removeRevMobBanner];
+ //   [self removeFlurryBanner];
     
     [DataModel sharedInstance].purchaseDelegate = nil;
     
@@ -907,7 +1148,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 {
     [super viewDidAppear: animated];
     //Sun
-    [self addRevMobBanner];
+   // [self addRevMobBanner];
     
     if ( nil != _faceDetector ) {
         if ( !_faceDetectionCompleted ) {
@@ -947,7 +1188,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 
 - (void)closeModalViews: (NSNotification*)info
 {
-//    [self.modalViewController dismissModalViewControllerAnimated: NO];
+    //    [self.modalViewController dismissModalViewControllerAnimated: NO];
 }
 
 
@@ -998,17 +1239,17 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
         if ( nil == self.removeBannerAdButton.superview ) {
             
             if ( nil != view ) {
-                self.removeBannerAdButton.center =
-                CGPointMake(self.view.frame.size.width - self.removeBannerAdButton.frame.size.width,
-                            view.frame.size.height * 0.5);
+                //  self.removeBannerAdButton.center =
+                //CGPointMake(self.view.frame.size.width - self.removeBannerAdButton.frame.size.width,
+                //          view.frame.size.height);
             }
             else {
-                self.removeBannerAdButton.center =
-                CGPointMake(self.view.frame.size.width - self.removeBannerAdButton.frame.size.width, 25);
+                //self.removeBannerAdButton.center =
+                //CGPointMake(self.view.frame.size.width - self.removeBannerAdButton.frame.size.width, 25);
             }
             
             
-            [self.view addSubview: self.removeBannerAdButton];
+            //  [self.view addSubview: self.removeBannerAdButton]; close adds
             
             if ( self.isCurtainShown || self.isHelpOverlayShown ) {
                 int topMostIndex = [self.view.subviews count] - 1;
@@ -1019,7 +1260,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     }
     else {
         if ( [DataModel sharedInstance].shouldShowBannerAds)
-           self.highHelpButton.center = self.highHelpButtonCenterWithBanner;
+            self.highHelpButton.center = self.highHelpButtonCenterWithBanner;
         else
             self.highHelpButton.center = self.highHelpButtonCenterNoBanner;
         
@@ -1028,7 +1269,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
         
 #ifndef MB_LUXURY
         if ( ![DataModel sharedInstance].shouldShowBannerAds)
-        [self.removeBannerAdButton removeFromSuperview];
+            [self.removeBannerAdButton removeFromSuperview];
 #endif
     }
 }
@@ -1036,17 +1277,17 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 
 - (void)bringButtonsToFront
 {
-    [self.view bringSubviewToFront: self.highHelpButton];
-    [self.view bringSubviewToFront: self.stacheColorsImageView];
-    [self.view bringSubviewToFront: self.highDollarButton];
-   
+   // [self.view bringSubviewToFront: self.highHelpButton];
+    //[self.view bringSubviewToFront: self.stacheColorsImageView];
+    //[self.view bringSubviewToFront: self.highDollarButton];
+    
 }
 
 
 - (void)subscribeToMobclixBannerKVO
 {
     if ( !self.isSubscrubiedToMobclixKVO ) {
-        [self addObserver: self 
+        [self addObserver: self
                forKeyPath: @"isMobClixBannerShown"
                   options: (NSKeyValueObservingOptionNew |
                             NSKeyValueObservingOptionOld)
@@ -1084,9 +1325,9 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
         
         //[self.mobclixAdView resumeAdAutoRefresh];
         
-//        if ( self.isMobClixBannerLoaded ) {
-//            self.isMobClixBannerShown = YES;
-//        }
+        //        if ( self.isMobClixBannerLoaded ) {
+        //            self.isMobClixBannerShown = YES;
+        //        }
     }
 }
 
@@ -1119,18 +1360,18 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     debug(@"Adding RevMob banner");
     if ( [DataModel sharedInstance].shouldShowBannerAds && nil == self.revMobBannerView.superview ) {
         
-        [self.view addSubview: self.revMobBannerView];
+       // [self.view addSubview: self.revMobBannerView];
         [self bringButtonsToFront];
-//        if ( self.isRevMobBannerLoaded ) {
-//            self.isRevMobBannerShown = YES;
-//        }
+        //        if ( self.isRevMobBannerLoaded ) {
+        //            self.isRevMobBannerShown = YES;
+        //        }
         if ( self.isRevMobBannerLoaded ) {
             self.isRevMobBannerShown = YES;
             //[self.view addSubview: self.removeBannerAdButton];
         }
-        [self.view addSubview: self.removeBannerAdButton];
+      //  [self.view addSubview: self.removeBannerAdButton];
         //[self bringButtonsToFront];
-        [self.view bringSubviewToFront: self.removeBannerAdButton];
+       // [self.view bringSubviewToFront: self.removeBannerAdButton];
         
     }
 }
@@ -1139,8 +1380,8 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 {
     debug(@"removing RevMob banner");
     if ( nil != self.revMobBannerView ) {
-//        [self.revMobBannerView removeFromSuperview];
-//        self.isRevMobBannerShown = NO;
+        //        [self.revMobBannerView removeFromSuperview];
+        //        self.isRevMobBannerShown = NO;
         [self.revMobBannerView removeFromSuperview];
         self.isRevMobBannerShown = NO;
         [self.removeBannerAdButton removeFromSuperview];
@@ -1176,7 +1417,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     debug(@"Adding Flurry banner");
     if ( [DataModel sharedInstance].shouldShowBannerAds && !self.isFlurryBannerShown ) {
         
-//        [FlurryAds fetchAndDisplayAdForSpace: FLURRY_AD_SPACE view: self.view size: BANNER_TOP];
+        //        [FlurryAds fetchAndDisplayAdForSpace: FLURRY_AD_SPACE view: self.view size: BANNER_TOP];
         [FlurryAds fetchAndDisplayAdForSpace: FLURRY_AD_SPACE view: _flurryAdContainerView size: BANNER_TOP];
         
         if ( self.isFlurryBannerLoaded ) {
@@ -1228,27 +1469,22 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     // adjust Mobclix Ad
     if ( UIInterfaceOrientationIsLandscape(interfaceOrientation) ) {
         [self removeMobclixAd];
-        [self removeRevMobBanner];
-        [self removeFlurryBanner];
+        //[self removeRevMobBanner];
+       // [self removeFlurryBanner];
     }
     else if ( UIInterfaceOrientationIsPortrait(self.interfaceOrientation) ) {
         [self addMobclixAd];
-        [self addRevMobBanner];
-        [self addFlurrybBanner];
+       // [self addRevMobBanner];
+        //[self addFlurrybBanner];
     }
 }
 
 
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
-{
-}
+
 
 
 - (void)layoutImageAndMustahcesToInterfaceOrientation: (UIInterfaceOrientation)interfaceOrientation
 {
-//    debug(@"laying out subviews to interfaceOrientation: %d", interfaceOrientation);
-    
-    // SAVE mustache centers
     NSMutableArray *oldStacheCenterArray = [[NSMutableArray alloc] init];
     for ( StacheView *stacheView in self.stachesArray ) {
         CGPoint oldStacheCenter = [self.scaledPicView convertPoint: stacheView.center fromView: self.imageView];
@@ -1287,7 +1523,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     
     self.sourceImageScaledRect = scaledImageRect;
     self.scaledPicView.frame = self.sourceImageScaledRect;
-
+    
     // UPDATE stache positions and size
     [self.stachesArray enumerateObjectsUsingBlock: ^(StacheView *stacheView, NSUInteger idx, BOOL *stop) {
         CGPoint oldStacheCenter = [[oldStacheCenterArray objectAtIndex: idx] CGPointValue];
@@ -1301,6 +1537,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
                                                       scaledViewScaleRatio);
         stacheView.center = newStacheCenter;
     }];
+
 }
 
 
@@ -1308,7 +1545,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 {
     [self.mustacheCurtainView setNeedsLayout];
     [self.packCurtainView setNeedsLayout];
-    [self.paidPacksCurtainView setNeedsLayout];    
+    [self.paidPacksCurtainView setNeedsLayout];
 }
 
 
@@ -1325,25 +1562,73 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 
 - (void)goVoila: (id)sender
 {
-    [Flurry logEvent: @"ForwardToVoila"
-               withParameters: [NSDictionary dictionaryWithObjectsAndKeys:
-                                ( UIInterfaceOrientationIsPortrait(self.interfaceOrientation) ?
-                                 @"portrait" :
-                                 @"landscape"), @"orientation", nil]];
+   // [Flurry logEvent: @"ForwardToVoila"
+     // withParameters: [NSDictionary dictionaryWithObjectsAndKeys:
+       //                ( UIInterfaceOrientationIsPortrait(self.interfaceOrientation) ?
+         //               @"portrait" :
+           //             @"landscape"), @"orientation", nil]];
     [self disableActiveMustache];
     
     VoilaViewController *voilaViewController = [[VoilaViewController alloc] initWithNibName: nil bundle: nil];
-    voilaViewController.sourceImage = [self exportStachedImage];
+    NSLog(@"addDescr==%@",addDescr);
+   /*
+    */
+    if(addDescr.text.length!=0 && ![addDescr.text isEqual:@"Добавить текст"]){
+        cloneView = [[CaptureView alloc] initWithView:myDescrView];
+        
+                 // eventually, to see it...
+        _myCapt = nil;
+       // _myCapt = [[UIImage alloc]init];
+    _myCapt = cloneView.imageCapture;
+       
+    UIImage *soIm  = [self exportStachedImage];
+        
+        
+        UIImage *im =   [self drawText:addDescr.text inImage:_myCapt atPoint:CGPointMake(3, 3)];
+      //  _myCapt.image = im;
+    resIm  = [self mergeImage:soIm withImage:im];
+   
+    
+    voilaViewController.sourceImage = resIm;//[self exportStachedImage];
+    }
+    else
+        voilaViewController.sourceImage = [self exportStachedImage];
+    
+    voilaViewController.descriptiontext = descriptionStr;
     //Sun
     voilaViewController.oriImage = self.originalImage;
+
+    voilaViewController.firstHeightVoila = firstHeightVoila;
+    voilaViewController.firstWidhtVoila = firstWidthVoila;
+    
+    
+    
     
     [self.navigationController pushViewController: voilaViewController animated: YES];
 }
 
 
-- (void)addStache: (id)sender 
+- (UIImage*)drawText:(NSString*)string inImage:(UIImage*)image atPoint:(CGPoint)point {
+    
+    UIFont *font = [UIFont boldSystemFontOfSize:12];
+    UIGraphicsBeginImageContext(image.size);
+    [image drawInRect:CGRectMake(0,0,image.size.width,image.size.height)];
+    
+    CGRect rect = CGRectMake(point.x, point.y, image.size.width, image.size.height);
+    [[UIColor blackColor] set];
+    [string drawInRect:CGRectIntegral(rect) withFont:font];
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return newImage;
+    
+}
+- (void)addStache: (id)sender
 {
     if ( nil == self.mustacheCurtainView ) {
+        
+        
+        NSLog(@"self.view.bounds.size.height==%f",self.view.bounds.size.height);
         self.mustacheCurtainView = [[MustacheCurtainView alloc] initWithFrame:
                                     CGRectMake(0,
                                                - self.view.bounds.size.height,
@@ -1351,21 +1636,31 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
                                                self.view.bounds.size.height)];
         self.mustacheCurtainView.delegate = self;
         [self.mustacheCurtainView setClosingTarget: self action: @selector(closeMustacheCurtain:)];
-        [self.mustacheCurtainView renderStaches];
+        [self.mustacheCurtainView renderStaches];//dima
         
         [self.view addSubview: self.mustacheCurtainView];
+        [self.view bringSubviewToFront:self.toolbar];
+        [self.toolbar sendSubviewToBack:self.mustacheCurtainView];
+        // [self.view addSubview: self.mustacheCurtainView];
+        /*
+         UISwipeGestureRecognizer *recognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(SwipeRecognizer:)];
+         recognizer.direction = UISwipeGestureRecognizerDirectionDown;
+         recognizer.numberOfTouchesRequired = 1;
+         recognizer.delegate = self;
+         [self.mustacheCurtainView addGestureRecognizer:recognizer];
+         */
     }
-//    else {
-//        [self.mustacheCurtainView redrawStacheBanners];
-//    }
+    //  else {
+    //     [self.mustacheCurtainView redrawStacheBanners];
+    //}
     
     if ( [DataModel sharedInstance].redrawMusctaheCurtain ) {
-        [self.mustacheCurtainView clearCurtain];
+        //  [self.mustacheCurtainView clearCurtain];
         [self.mustacheCurtainView renderStaches];
         [DataModel sharedInstance].redrawMusctaheCurtain = NO;
     }
     
-    [self.view bringSubviewToFront: self.mustacheCurtainView];
+  //  [self.view bringSubviewToFront: self.mustacheCurtainView];
     
     if ( sender == self.addMustacheButton.button ) {
         [Flurry logEvent: @"OpenStacheSelectionForAdding"];
@@ -1373,53 +1668,350 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     }
     else if ( sender == self.changeMustacheButton.button ) {
         [Flurry logEvent: @"OpenStacheSelectionForChanging"];
-        self.callerMustacheButton = self.changeMustacheButton;
+        //self.callerMustacheButton = self.changeMustacheButton;
+        self.callerMustacheButton = self.addMustacheButton;
     }
     else {
+        
         error(@"ACHTUNG! no parent HighlightedButton found for button: %@", sender);
+        //self.callerMustacheButton = self.changeMustacheButton;
+        [Flurry logEvent: @"OpenStacheSelectionForAdding"];
+        self.callerMustacheButton = self.addMustacheButton;
+        
     }
     
-    [UIView animateWithDuration: 0.3
+    [UIView animateWithDuration: 1.3
                           delay: 0.0
                         options: UIViewAnimationOptionCurveEaseOut
                      animations: ^{
-                         self.mustacheCurtainView.frame = self.view.bounds;
+                         //   self.mustacheCurtainView.frame = self.view.bounds;
+                         self.mustacheCurtainView.frame = CGRectMake(0,
+                                                                     -5,
+                                                                     self.view.bounds.size.width,
+                                                                     250);
                      }
                      completion: ^(BOOL finished) {
                          self.isCurtainShown = YES;
-                         [self makeTopMostView: self.mustacheCurtainView];
+                      //   [self makeTopMostView: self.mustacheCurtainView];
                      }
      ];
+   
+    [self.view bringSubviewToFront:self.toolbar];
+    [self.toolbar sendSubviewToBack:self.mustacheCurtainView];
+
+    
+    //self.mustacheCurtainView.layer.borderWidth = 3;
+   // self.mustacheCurtainView.layer.backgroundColor = [UIColor redColor].CGColor;
+}
+- (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+    [self.view bringSubviewToFront:self.toolbar];
+    [addDescr resignFirstResponder];
+
+    [self.toolbar sendSubviewToBack:self.mustacheCurtainView];
+    touchesEnded  =NO;
+    UITouch *touch =  [[event touchesForView:self.mustacheCurtainView] anyObject];
+    CGPoint touchLocation = [touch locationInView:self.mustacheCurtainView];
+    CGRect redDotRect = CGRectMake(0, 0, 320, 10);
+    UIView *red = [[UIView alloc] initWithFrame: CGRectMake(0, 0, 320, 80)];
+    red.layer.borderWidth  =3;
+     touchLocationMY.y = touchLocation.y;
+  
+    if (!CGRectContainsPoint(redDotRect, touchLocation)) {
+        isDragging = YES;
+       
+        NSLog(@"Red Dot tapped!01==%f",touchLocation.y);
+        //   NSLog(@"redDotRect0==%f",self.mustacheCurtainView.frame.origin.y
+        //       );
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            
+            [UIView animateWithDuration:0.6
+                                  delay:0.0
+                                options:UIViewAnimationOptionCurveEaseOut
+                             animations:^{
+                               //  self.mustacheCurtainView.frame = CGRectMake(0,-5,
+                                 //                                            self.view.bounds.size.width,
+                                   //                                          250);
+                             }
+                             completion:^(BOOL finished) {
+                             }];
+        });
+    } else if(touchLocation.y<237 &&touchLocationMY.y>=200.0 ){
+        /* self.mustacheCurtainView.frame = CGRectMake(0,
+         14,
+         self.view.bounds.size.width,
+         250);*/
+        return;
+    }
+}
+- (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    touchesEnded =  TRUE;
+    UITouch *touch = [touches anyObject];
+    CGPoint touchLocation = [touch locationInView:self.view];
+    
+    NSLog(@"touchLocationMY0==%f",touchLocationMY.y-(self.mustacheCurtainView.frame.size.height/2));
+    NSLog(@"touchLocation0==%f",touchLocation.y);
+    NSLog(@"Delta==%f",(touchLocationMY.y-(self.mustacheCurtainView.frame.size.height/4))-(touchLocation.y));
+    
+    
+    if((touchLocationMY.y-(self.mustacheCurtainView.frame.size.height/4))-(touchLocation.y)>=0 || (
+        touchLocationMY.y-(self.mustacheCurtainView.frame.size.height/4)-(touchLocation.y)>=-80 && touchLocationMY.y-(self.mustacheCurtainView.frame.size.height/4)-(touchLocation.y)<=-50))
+        
+    [UIView animateWithDuration:0.1
+                          delay:0.0
+                        options:0
+                     animations:^{
+                         self.mustacheCurtainView.frame = CGRectMake(0,
+                                                                     -175,
+                                                                     self.view.bounds.size.width,
+                                                                     250);
+                     }
+                     completion:^(BOOL finished) {
+                     }];
+    else
+    {
+        [UIView animateWithDuration:0.1
+                              delay:0.0
+                            options:0
+                         animations:^{
+                             self.mustacheCurtainView.frame = CGRectMake(0,
+                                                                         -7,
+                                                                         self.view.bounds.size.width,
+                                                                         250);
+                         }
+                         completion:^(BOOL finished) {
+                         }];
+    }
+    CGRect redDotRect = [self.mustacheCurtainView frame];
+    if (CGRectContainsPoint(redDotRect, touchLocation)) {
+        
+        if(abs(touchLocationMY.y-touchLocation.y)>0 && abs(touchLocationMY.y-touchLocation.y)<2)
+         //   [self closeCurtain: self.mustacheCurtainView  withCompletion: ^(BOOL finished) {
+           //     self.isCurtainShown = NO;
+            //}];
+        
+        [UIView animateWithDuration:0.1
+                              delay:0.0
+                            options:0
+                         animations:^{
+                               self.mustacheCurtainView.transform = CGAffineTransformMakeScale(1.0, 1.0);
+                         }
+                         completion:^(BOOL finished) {
+                         }];
+    }
+    isDragging = NO;
+}
+- (void)closeCurtain: (MustacheCurtainView*)curtainView withCompletion: (void(^)(BOOL finished))block
+{
+    if ( nil != curtainView ) {
+        [UIView animateWithDuration: 0.3
+                              delay: 0.0
+                            options: UIViewAnimationOptionCurveEaseIn
+                         animations: ^{
+                             CGRect newFrame = curtainView.frame;
+                             newFrame.origin.y = - self.view.bounds.size.height;
+                             
+                             curtainView.frame = CGRectMake(0, -170, 320, 250);
+                         }
+                         completion: block
+         ];
+    }
+    [self.view bringSubviewToFront:self.toolbar];
+    [self.toolbar sendSubviewToBack:self.mustacheCurtainView];
 }
 
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+    if ([touch.view isKindOfClass:[UIView class]])
+    {
+        return YES;
+    }
+    return NO;
+}
+- (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    CGPoint touchLocation = [touch locationInView:self.view];
+   
+    
+    if (isDragging) {
+        [UIView animateWithDuration:0.0f
+                              delay:0.0f
+                            options:(UIViewAnimationOptionBeginFromCurrentState|UIViewAnimationOptionCurveEaseInOut)
+                         animations:^{
+                             
+                             //if(self.mustacheCurtainView.center.y<118.0 && touchLocation.y>40) {
+                             
+                            if(touchLocationMY.y-(touchLocation.y+5)>=0 && self.mustacheCurtainView.center.y>-58.0 && self.mustacheCurtainView.center.y<=120 && touchLocation.y>0)
+                            {
+                               
+                               // NSLog(@"touchesMoved0==%f",self.mustacheCurtainView.center.y);
+                                //NSLog(@"touchLocationMY0==%f",touchLocationMY.y);
+                                //NSLog(@"touchLocation0==%f",touchLocation.y);
+                                 self.mustacheCurtainView.center = CGPointMake(self.view.frame.size.width/2, touchLocation.y-(self.mustacheCurtainView.frame.size.height-5)/2);
+                                
+                            }
+                            else if( self.mustacheCurtainView.center.y>=-60.0 &&self.mustacheCurtainView.center.y<=-58.0 && self.mustacheCurtainView.center.y<=120 && (touchLocationMY.y-touchLocation.y)<=0 &&touchLocation.y>0)
+                            {
+                                NSLog(@"touchesMoved1==%f",self.mustacheCurtainView.center.y);
+                                NSLog(@"touchLocationMY1==%f",touchLocationMY.y);
+                                NSLog(@"touchLocation1==%f",touchLocation.y);
+                                self.mustacheCurtainView.center = CGPointMake(self.view.frame.size.width/2, touchLocation.y-(self.mustacheCurtainView.frame.size.height)/2);
+                                                            }
+                           /* else
+                             {
+                                 NSLog(@"touchesMoved==%f",self.mustacheCurtainView.center.y);
+                                 NSLog(@"touchLocationMY==%f",touchLocationMY.y);
+                                 NSLog(@"touchLocation==%f",touchLocation.y);
+                                 self.mustacheCurtainView.frame = CGRectMake(0,
+                                                                             -170,
+                                                                             self.view.bounds.size.width,
+                                                                             250);
+                             }
+                             */
+                            // NSLog(@"touchLocationMY==%f",touchLocationMY.y);
+                             //NSLog(@"touchLocation==%f",touchLocation.y);
 
+                                   //NSLog(@"touchesMoved==%f",self.mustacheCurtainView.center.y);
+                                   [self.view bringSubviewToFront:self.toolbar];
+                             [self.toolbar sendSubviewToBack:self.mustacheCurtainView];
+                         }
+                         completion:NULL];
+    }
+}
+
+-(void)closeView{
+     self.toolbar.hidden  = NO;
+    [PlaceHoldView removeFromSuperview];
+}
 - (void)closeMustacheCurtain: (id)sender
 {
+     defs = [[NSUserDefaults alloc]init];
+    [defs synchronize];
     MustacheHighlightedButton *highButton = (MustacheHighlightedButton*)sender;
-    
+    NSLog(@"highButtonhighButtonhighButton==%d",highButton.tag);
     if ( [highButton isKindOfClass: [MustacheHighlightedButton class]]) {
         [Flurry logEvent: @"MustacheSelected"
-                   withParameters: [NSDictionary dictionaryWithObjectsAndKeys:
-                                    highButton.stache.title, @"MustacheName",
-                                    highButton.pack.name, @"PackName", nil]];
+          withParameters: [NSDictionary dictionaryWithObjectsAndKeys:
+                           highButton.stache.title, @"MustacheName",
+                           highButton.pack.name, @"PackName", nil]];
         
-        if ( nil != self.callerMustacheButton ) {
-            NSArray *imagesArray = [highButton.pack imagesForStaches: highButton.stache];
-            if ( self.callerMustacheButton == self.changeMustacheButton ) {
-                [self changeCurrentStacheWithImageArray: imagesArray stache: highButton.stache];
-            }
-            else if ( self.callerMustacheButton == self.addMustacheButton ) {
-                [self addNewStacheToViewWithImageArray: imagesArray stache: highButton.stache];
-            }
-            else {
-                error(@"unknown self.callerMustacheButton: %@", self.callerMustacheButton);
-            }
+        // if ( nil != self.callerMustacheButton ) {
+        NSArray *imagesArray = [highButton.pack imagesForStaches: highButton.stache];
+        //NSLog(@"highButton.stache==%@",highButton.stache);
+        NSLog(@"imagesArray==%@",highButton.stache.title);
+
+        //   NSLog(@"highButton.pack==%@",highButton.pack);
+        // if ( self.callerMustacheButton == self.changeMustacheButton ) {
+        //   [self changeCurrentStacheWithImageArray: imagesArray stache: highButton.stache];
+        //}
+        //else if ( self.callerMustacheButton == self.addMustacheButton ) {
+         valueForAppPurchase  = [[NSString alloc]initWithFormat:@"%@",highButton.stache ];
+       
+        
+        if(highButton.tag==1 || highButton.tag==[defs integerForKey:valueForAppPurchase])
+        [self addNewStacheToViewWithImageArray: imagesArray stache: highButton.stache];
+        
+        else if(highButton.tag>1 && highButton.tag!=[defs integerForKey:valueForAppPurchase])
+        {
+            NSLog(@"APPPPPPP");
+            UIButton *byOnePict = [UIButton buttonWithType: UIButtonTypeCustom];
+            NSString *nameForButton = [[NSString alloc]initWithFormat:@" Buy %@",highButton.stache.title ];
+           // [byOnePict setContentMode:UIViewContentModeScaleAspectFill];
+       //     byOnePict.contentHorizontalAlignment= UIControlContentHorizontalAlignmentFill;
             
-            self.callerMustacheButton = nil;
+            [byOnePict setTitle:nameForButton forState:UIControlStateNormal];
+            byOnePict.titleLabel.adjustsFontSizeToFitWidth = YES;
+           // [byOnePict sizeToFit];
+            [byOnePict addTarget:self action:@selector(byOnePict:) forControlEvents:UIControlEventTouchUpInside];
+            
+         //   [byOnePict performSelector:@selector(byOnePict:) withObject:@"SDSD"];
+            byOnePict.frame = CGRectMake(0, 480, 140, 44);
+            byOnePict.tag =highButton.tag;
+          //  byOnePict.titleLabel.text  = @"SDSD";
+            [PlaceHoldView addSubview:byOnePict];
+            byOnePict.layer.borderWidth  =1;
+            byOnePict.layer.borderColor = [UIColor whiteColor
+                                           ].CGColor;
+//by all button
+            UIButton *byAll = [UIButton buttonWithType: UIButtonTypeCustom];
+            
+            [byAll setTitle:@"By All" forState:UIControlStateNormal];
+            [byAll addTarget:self action:@selector(byAll:) forControlEvents:UIControlEventTouchUpInside];
+            byAll.frame = CGRectMake(180, 480
+                                     , 140, 44);
+            byAll.tag =highButton.tag;
+            
+            byAll.layer.borderWidth  =1;
+            byAll.layer.borderColor = [UIColor whiteColor
+                                           ].CGColor;
+          
+//
+            PlaceHoldView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];//
+            UIImageView *TopView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bottom_bar_black.png"]];
+            NSString *string = [[NSString alloc]initWithFormat:@"%@",highButton.stache.title ];
+            UILabel *nameOfPurchase = [[UILabel alloc] initWithFrame:CGRectMake(0, 60, 320, 30)];
+            nameOfPurchase.textAlignment = NSTextAlignmentCenter;
+           // nameOfPurchase.layer.borderWidth = 3;
+            //nameOfPurchase.layer.borderColor  = [UIColor redColor].CGColor;
+            [nameOfPurchase setText:string];
+            [nameOfPurchase setTextColor:[UIColor whiteColor]];
+            nameOfPurchase.textColor = [UIColor whiteColor];
+            [PlaceHoldView addSubview:nameOfPurchase];
+            
+//Price fo feature 1
+            UILabel *pricePict1 = [[UILabel alloc] initWithFrame:CGRectMake(10, 407, 300, 30)];
+            UILabel *pricePict1pr = [[UILabel alloc] initWithFrame:CGRectMake(295, 407, 20, 30)];
+            [pricePict1pr setText:@"1€"];
+             [PlaceHoldView addSubview:pricePict1pr];
+             pricePict1pr.textColor = [UIColor whiteColor];
+            NSString *priceForSample = [[NSString alloc]initWithFormat:@"Price for %@",highButton.stache.title ];
+            [pricePict1 setText:priceForSample];
+            [pricePict1 setTextColor:[UIColor whiteColor]];
+            pricePict1.textColor = [UIColor whiteColor];
+            [PlaceHoldView addSubview:pricePict1];
+//Price fo feature All
+            UILabel *priceAll = [[UILabel alloc] initWithFrame:CGRectMake(10, 437, 320, 30)];
+            [priceAll setText:@"Price for all pictures                            3€"];
+            [priceAll setTextColor:[UIColor whiteColor]];
+            priceAll.textColor = [UIColor whiteColor];
+            [PlaceHoldView addSubview:priceAll];
+//Notes
+            UILabel *notes = [[UILabel alloc] initWithFrame:CGRectMake(10, self.view.frame.size.height-30, 320, 30)];
+            
+            notes.font = [UIFont fontWithName:@"Arial" size:12];
+            
+            [notes setText:@"После покупки реклама убирается"];
+            [notes setTextColor:[UIColor whiteColor]];
+            notes.textColor = [UIColor whiteColor];
+            [PlaceHoldView addSubview:notes];
+            
+            
+            [PlaceHoldView addSubview:byOnePict];
+              [PlaceHoldView addSubview:byAll];
+            TopView.frame = CGRectMake(0, 0, 320, TopView.frame.size.height/2);
+            [self.view addSubview:TopView];
+            PlaceHoldView.backgroundColor = [UIColor blackColor];
+            [self.view addSubview:PlaceHoldView];
+            self.toolbar.hidden  = YES;
+//            [self.view setUserInteractionEnabled:NO];
+            [self createToolBar1];
+            [self addNewStacheToViewWithImageArrayPurchase: imagesArray stache: highButton.stache];
+
         }
-        else {
-            error(@"self.callerMustacheButton is NIL!");
-        }
+        //}
+        //else {
+        //  error(@"unknown self.callerMustacheButton: %@", self.callerMustacheButton);
+        //[self addNewStacheToViewWithImageArray: imagesArray stache: highButton.stache];
+        
+        //}
+        
+        self.callerMustacheButton = nil;
+        //  }
+        //  else {
+        //    error(@"self.callerMustacheButton is NIL!");
+        //  [self addNewStacheToViewWithImageArray: imagesArray stache: highButton.stache];
+        //}
     }
     else {
         [Flurry logEvent: @"CloseMustacheSelection"];
@@ -1429,7 +2021,55 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
         self.isCurtainShown = NO;
     }];
 }
+-(void)byOnePict:(id)feature{
+     NSLog(@"Feate====%@",valueForAppPurchase);
+      MustacheHighlightedButton* highButton = (MustacheHighlightedButton*)feature;
+///       MustacheHighlightedButton *highButton = (MustacheHighlightedButton*)feature;
+   // NSString * valueForAppPurchase  = [[NSString alloc]initWithFormat:@"%@",highButton.stache ];
+   
 
+   [[MKStoreManager sharedManager] buyFeatureB:highButton.tag :valueForAppPurchase];
+    // [defs setInteger: highButton.tag forKey:valueForAppPurchase];
+}
+-(void)byAll:(id)feat{
+    [[MKStoreManager sharedManager] buyFeatureA:1:@"AllPict"];
+}
+- (void)createToolBar1
+{
+    NSMutableArray *buttonsArray = [[NSMutableArray alloc] init];
+    //Sun - iPad support
+    NSString *arrL = @"back"/*, *plusName = @"recycle" ,mustacheName = @"mustache"*/;
+  //  NSString *recycleName = @"recycle", *shareName = @"next";
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
+        arrL = @"back";
+        
+        /* plusName = @"plus";*/
+        /* mustacheName = @"mustache-ipad";*/
+     //   recycleName = @"recycle-ipad";
+       // shareName = @"next";
+    }
+    
+    [buttonsArray addObject: [self buttonWithImageNamed: arrL target: self action: @selector(closeView)]];
+    
+    //[buttonsArray addObject: [self buttonWithImageNamed: recycleName target: self action: @selector(removeStache:)]];
+    
+   // self.recycleButton = (HighlightedButton*)[self buttonWithImageNamed: recycleName target: self action: @selector(removeStache:)];
+  //  [buttonsArray addObject: self.recycleButton];
+    
+    // self.addMustacheButton = (HighlightedButton*)[self buttonWithImageNamed: plusName target: self action: @selector(goBack:)];
+    //[buttonsArray addObject: self.addMustacheButton];
+    
+    // self.changeMustacheButton = (HighlightedButton*)[self buttonWithImageNamed: mustacheName target: self action: @selector(addStache:)];
+    //[buttonsArray addObject: self.changeMustacheButton];
+    
+#ifndef MB_LUXURY
+    //  [buttonsArray addObject: [self buttonWithImageNamed: basketName target: self action: @selector(buyStache:)]];
+#endif
+    
+   // [buttonsArray addObject: [self buttonWithImageNamed: shareName target: self action: @selector(goVoila:)]];
+    
+    [self createBottomToolbarPurchase: buttonsArray];
+}
 
 - (void)changeCurrentStacheWithImageArray: (NSArray*)imagesArray stache: (DMStache*)stache
 {
@@ -1440,30 +2080,29 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     
     self.currentStacheView.stache = stache;
     [self.currentStacheView setNewStacheImageArray: imagesArray];
-    [self updateColorIndicator];
-//    [self updateDollarButton];
+    // [self updateColorIndicator];
+    //    [self updateDollarButton];
 }
 
-
-- (StacheView*)addNewStacheToViewWithImageArray: (NSArray*)imagesArray stache: (DMStache*)stache
+- (StacheView*)addNewStacheToViewWithImageArrayPurchase: (NSArray*)imagesArray stache: (DMStache*)stache
 {
     if ( 0 == [imagesArray count] ) {
         error(@"empty imagesArray. Bailing out");
         return nil;
     }
-    
+    NSLog(@"imagesArray====%@",[imagesArray objectAtIndex: 0]);
     UIImage *image = [imagesArray objectAtIndex: 0];
-//    StacheView *newStacheView = [[StacheView alloc] initWithFrame:
-//                                 CGRectMake(0, 0,
-//                                            0.5 * image.size.width,
-//                                            0.5 * image.size.height)
-//                                                      imagesArray: imagesArray];
+    //    StacheView *newStacheView = [[StacheView alloc] initWithFrame:
+    //                                 CGRectMake(0, 0,
+    //                                            0.5 * image.size.width,
+    //                                            0.5 * image.size.height)
+    //                                                      imagesArray: imagesArray];
     CGFloat widthImage, heightImage;
     //Sun - iPad support
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
         if ([GUIHelper isIPadretina]){//iPad retina
-        widthImage = 2*image.size.width;
-        heightImage = 2*image.size.height;
+            widthImage = 2*image.size.width;
+            heightImage = 2*image.size.height;
         }
         else{
             widthImage = 1.3*image.size.width;
@@ -1478,21 +2117,93 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
         widthImage = image.size.width/2;
         heightImage = image.size.height/2;
     }
-   // UIImage *scaledImage = [GUIHelper imageByScaling: image toSize: CGSizeMake(widthImage, heightImage)];
+    // UIImage *scaledImage = [GUIHelper imageByScaling: image toSize: CGSizeMake(widthImage, heightImage)];
+    
+    
+    StacheView *newStacheView = [[StacheView alloc] initWithFrame:
+                                 CGRectMake(25 , 105,
+                                            widthImage*4,
+                                            heightImage*4)
+                                                      imagesArray: imagesArray];
+    NSLog(@"self.imageView.center==%f",self.imageView.center.x);
+    //newStacheView.center = self.imageView.center;
+    newStacheView.delegate = self;
+   // newStacheView.layer.borderWidth  =3;
+   // newStacheView.layer.borderColor = [UIColor redColor].CGColor;
+    
+   // [newStacheView setupPinchGestureWithTarget: self action: @selector(scaleStache:) delegate: self];
+   // [newStacheView setupRotationGestureWithTarget: self action: @selector(rotateStache:) delegate: self];
+   // newStacheView.stache = stache;
+    
+    [PlaceHoldView addSubview: newStacheView];//add stache to view
+    
+    
+    
+   // [self.stachesArray addObject: newStacheView];
+    
+    //if ( nil != self.currentStacheView ) {
+      //  self.currentStacheView.enabled = NO;
+   // }
+    //self.currentStacheView = newStacheView;
+    //self.currentStacheView.enabled = YES;
+    
+    //[self setMustacheBarButtonsEnabled: YES];
+  //  [self addImageViewGestures];
+    //  [self updateColorIndicator];
+    //    [self updateDollarButton];
+    
+    return newStacheView;
+}
 
 
+- (StacheView*)addNewStacheToViewWithImageArray: (NSArray*)imagesArray stache: (DMStache*)stache
+{
+    if ( 0 == [imagesArray count] ) {
+        error(@"empty imagesArray. Bailing out");
+        return nil;
+    }
+    
+    UIImage *image = [imagesArray objectAtIndex: 0];
+    //    StacheView *newStacheView = [[StacheView alloc] initWithFrame:
+    //                                 CGRectMake(0, 0,
+    //                                            0.5 * image.size.width,
+    //                                            0.5 * image.size.height)
+    //                                                      imagesArray: imagesArray];
+    CGFloat widthImage, heightImage;
+    //Sun - iPad support
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
+        if ([GUIHelper isIPadretina]){//iPad retina
+            widthImage = 2*image.size.width;
+            heightImage = 2*image.size.height;
+        }
+        else{
+            widthImage = 1.3*image.size.width;
+            heightImage = 1.3*image.size.height;
+        }
+    }
+    else if ( [GUIHelper isPhone5] ) {
+        widthImage = image.size.width;
+        heightImage = image.size.height;
+    }
+    else {
+        widthImage = image.size.width/2;
+        heightImage = image.size.height/2;
+    }
+    // UIImage *scaledImage = [GUIHelper imageByScaling: image toSize: CGSizeMake(widthImage, heightImage)];
+    
+    
     StacheView *newStacheView = [[StacheView alloc] initWithFrame:
                                  CGRectMake(0, 0,
                                             widthImage,
                                             heightImage)
                                                       imagesArray: imagesArray];
-
+    
     newStacheView.center = self.imageView.center;
     newStacheView.delegate = self;
     [newStacheView setupPinchGestureWithTarget: self action: @selector(scaleStache:) delegate: self];
     [newStacheView setupRotationGestureWithTarget: self action: @selector(rotateStache:) delegate: self];
     newStacheView.stache = stache;
-
+    
     [self.imageView addSubview: newStacheView];
     [self.stachesArray addObject: newStacheView];
     
@@ -1504,8 +2215,8 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     
     [self setMustacheBarButtonsEnabled: YES];
     [self addImageViewGestures];
-    [self updateColorIndicator];
-//    [self updateDollarButton];
+    //[self updateColorIndicator];
+    //    [self updateDollarButton];
     
     return newStacheView;
 }
@@ -1522,7 +2233,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     self.currentStacheView = nil;
     [self setMustacheBarButtonsEnabled: NO];
     [self updateColorIndicator];
-//    [self updateDollarButton];
+    //    [self updateDollarButton];
 }
 
 
@@ -1545,8 +2256,8 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
             self.stacheColorsImageViewCenterNoBanner = CGPointMake(self.view.frame.size.width - 70 ,  80);
             self.stacheColorsImageViewCenterWithBanner = CGPointMake( self.view.frame.size.width - 70, 140);
         }else{
-        self.stacheColorsImageViewCenterNoBanner = CGPointMake(self.view.frame.size.width - 40, 40);
-        self.stacheColorsImageViewCenterWithBanner = CGPointMake(self.view.frame.size.width - 35, 40 + 43);
+            self.stacheColorsImageViewCenterNoBanner = CGPointMake(self.view.frame.size.width - 40, 40);
+            self.stacheColorsImageViewCenterWithBanner = CGPointMake(self.view.frame.size.width - 35, 40 + 43);
         }
         if ( self.isMobClixBannerShown ) {
             self.stacheColorsImageView.center = self.stacheColorsImageViewCenterWithBanner;
@@ -1555,7 +2266,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
             if ( self.isRevMobBannerShown ) {
                 self.stacheColorsImageView.center = self.stacheColorsImageViewCenterWithBanner;
             }else
-            self.stacheColorsImageView.center = self.stacheColorsImageViewCenterNoBanner;
+                self.stacheColorsImageView.center = self.stacheColorsImageViewCenterNoBanner;
         }
         
         // add TAP gesture recognizer
@@ -1564,13 +2275,14 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
                                                 action: @selector(tapColorIndicator:)];
         tapGesture.delegate = self;
         [self.stacheColorsImageView addGestureRecognizer: tapGesture];
+        
     }
     // Sun - iPad
     CGFloat shift = 40;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
         shift = 71;
     }
-
+    
     if ( nil == self.stacheColorsImageView.superview) {
         CGFloat y = 0;
         if ( self.view.frame.size.width - shift != self.stacheColorsImageView.center.x ) { // update position according to orientation
@@ -1581,7 +2293,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
             }
             else {
                 if (self.isRevMobBannerShown){
-                y = self.stacheColorsImageViewCenterWithBanner.y;
+                    y = self.stacheColorsImageViewCenterWithBanner.y;
                 }else
                     y = self.stacheColorsImageViewCenterNoBanner.y;
             }
@@ -1593,19 +2305,19 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
                 self.stacheColorsImageView.center = self.stacheColorsImageViewCenterWithBanner;
             }
         }
-        [self.view addSubview: self.stacheColorsImageView];
+        //   [self.view addSubview: self.stacheColorsImageView];
         
     }
     
     if ( 0 == self.mustachesToDropCount && [DataModel sharedInstance].shouldShowMustacheColorInstructions ) {
         [DataModel sharedInstance].didShowMustacheColorInstructions = YES;
         
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Tip", @"Alert title")
-                                                        message: NSLocalizedString(@"When you see the color wheel icon, you can tap it to change the mustache color.", @"Alert text")
-                                                       delegate: nil
-                                              cancelButtonTitle: NSLocalizedString( @"Dismiss", @"")
-                                              otherButtonTitles: nil];
-        [alert show];
+        /* UIAlertView *alert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Tip", @"Alert title")
+         message: NSLocalizedString(@"When you see the color wheel icon, you can tap it to change the mustache color.", @"Alert text")
+         delegate: nil
+         cancelButtonTitle: NSLocalizedString( @"Dismiss", @"")
+         otherButtonTitles: nil];
+         [alert show];*/
     }
 }
 
@@ -1651,10 +2363,10 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     
     if ( nil == self.paidPacksCurtainView ) {
         self.paidPacksCurtainView = [[MustacheCurtainView alloc] initWithFrame:
-                                    CGRectMake(0,
-                                               - self.view.bounds.size.height,
-                                               self.view.bounds.size.width,
-                                               self.view.bounds.size.height)];
+                                     CGRectMake(0,
+                                                - self.view.bounds.size.height,
+                                                self.view.bounds.size.width,
+                                                self.view.bounds.size.height)];
         self.paidPacksCurtainView.delegate = self;
         [self.paidPacksCurtainView setClosingTarget: self action: @selector(closePaidPacksCurtain:)];
         [self.paidPacksCurtainView renderPaidPackBanners];
@@ -1668,7 +2380,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
         [DataModel sharedInstance].redrawPacksCurtain = NO;
     }
     
-    [self.view bringSubviewToFront: self.paidPacksCurtainView];
+   // [self.view bringSubviewToFront: self.paidPacksCurtainView];
     [UIView animateWithDuration: 0.3
                           delay: 0.0
                         options: UIViewAnimationOptionCurveEaseOut
@@ -1677,7 +2389,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
                      }
                      completion: ^(BOOL finished) {
                          self.isCurtainShown = YES;
-                         [self makeTopMostView: self.paidPacksCurtainView];
+                       //  [self makeTopMostView: self.paidPacksCurtainView];
                      }
      ];
 }
@@ -1692,37 +2404,22 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 }
 
 
-- (void)closeCurtain: (MustacheCurtainView*)curtainView withCompletion: (void(^)(BOOL finished))block
-{
-    if ( nil != curtainView ) {
-        [UIView animateWithDuration: 0.3
-                              delay: 0.0
-                            options: UIViewAnimationOptionCurveEaseIn
-                         animations: ^{
-                             CGRect newFrame = curtainView.frame;
-                             newFrame.origin.y = - self.view.bounds.size.height;
-                             curtainView.frame = newFrame;
-                         }
-                         completion: block
-         ];
-    }
-}
 
 
 - (void)showCurtainForPack: (DMPack*)pack
 {
     if ( nil == self.packCurtainView ) {
         self.packCurtainView = [[MustacheCurtainView alloc] initWithFrame:
-                                    CGRectMake(0,
-                                               - self.view.bounds.size.height,
-                                               self.view.bounds.size.width,
-                                               self.view.bounds.size.height)];
+                                CGRectMake(0,
+                                           - self.view.bounds.size.height,
+                                           self.view.bounds.size.width,
+                                           self.view.bounds.size.height)];
         self.packCurtainView.delegate = self;
         [self.packCurtainView setClosingTarget: self action: @selector(closePackCurtain:)];
         [self.view addSubview: self.packCurtainView];
     }
     
-    [self.view bringSubviewToFront: self.packCurtainView];
+    //[self.view bringSubviewToFront: self.packCurtainView];
     SKProduct *product = [[DataModel sharedInstance] productForPack: pack];
     
     // format localized price
@@ -1749,7 +2446,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
                      }
                      completion: ^(BOOL finished) {
                          self.isCurtainShown = YES;
-                         [self makeTopMostView: self.packCurtainView];
+                        // [self makeTopMostView: self.packCurtainView];
                      }
      ];
 }
@@ -1766,7 +2463,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 
 - (void)removeBanner: (id)sender
 {
-    debug(@"remove banner pressed");
+    debug(@"remove banner pressed0");
     [[DataModel sharedInstance] removeBannerAd];
 }
 
@@ -1785,10 +2482,11 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
                                            overlayImage.size.width, overlayImage.size.height)];
         self.helpOverlayView.image = overlayImage;
         self.helpOverlayView.userInteractionEnabled = YES;
-        [self.view addSubview: self.helpOverlayView];
+        //[self.view addSubview: self.helpOverlayView];
         
         UITapGestureRecognizer *helpOverlayTapGesture = [[UITapGestureRecognizer alloc] initWithTarget: self action: @selector(tapHelpOverlay:)];
         [self.helpOverlayView addGestureRecognizer: helpOverlayTapGesture];
+        
     }
     
     
@@ -1832,12 +2530,12 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
         return [UIImage imageNamed: @"ov-portrait-version-ipad.png"];
     }else{
-    if ( UIInterfaceOrientationIsPortrait(self.interfaceOrientation) ) {
-        return [UIImage imageNamed: @"ov-portrait-version.png"];
-    }
-    else {
-        return [UIImage imageNamed: @"ov-landscape-version.png"];
-    }
+        if ( UIInterfaceOrientationIsPortrait(self.interfaceOrientation) ) {
+            return [UIImage imageNamed: @"ov-portrait-version.png"];
+        }
+        else {
+            return [UIImage imageNamed: @"ov-landscape-version.png"];
+        }
     }
 }
 
@@ -1890,7 +2588,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     }
     
     CGFloat scaleFactor = 1 / self.originalScaleFactor;
-    
+    NSLog(@"scaleFactor==%f",scaleFactor);
     if ( UIInterfaceOrientationIsLandscape(self.interfaceOrientation) ) {
         scaleFactor *= (self.sourceImageSize.height * self.originalScaleFactor / self.sourceImageScaledRect.size.height);
     }
@@ -1945,7 +2643,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 
 - (CGImageRef)newCGImageRotated:(CGImageRef)imgRef byRadians: (CGFloat)angleInRadians
 {
-//	CGFloat angleInRadians = angle * (M_PI / 180);
+    //	CGFloat angleInRadians = angle * (M_PI / 180);
 	CGFloat width = CGImageGetWidth(imgRef);
 	CGFloat height = CGImageGetHeight(imgRef);
     
@@ -2018,7 +2716,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     if ( nil == self.panGesture.view ) {
         [self.imageView addGestureRecognizer: self.panGesture];
     }
-
+    
     
     // TAP
     if ( nil == self.tapGesture ){
@@ -2056,19 +2754,26 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 - (void)panStache: (UIPanGestureRecognizer*)gestureRecognizer
 {
     UIView *parentView = gestureRecognizer.view;
-    
+  
     if ( gestureRecognizer.state == UIGestureRecognizerStateBegan
         || gestureRecognizer.state == UIGestureRecognizerStateChanged )  {
         
         CGPoint translation = [gestureRecognizer translationInView: parentView];
-
+        
         CGPoint newCenter = CGPointMake(self.currentStacheView.center.x + translation.x,
                                         self.currentStacheView.center.y + translation.y);
+        //  NSLog(@"newCenter.x==%f",newCenter.x);
+       // NSLog(@"parentView.bounds.size.width%f",parentView.bounds.size.width);
         
+        
+        
+
         if ( 0 < newCenter.x && newCenter.x < parentView.bounds.size.width
-            && 0 < newCenter.y && newCenter.y < parentView.bounds.size.height) {
+            && 0 < newCenter.y && newCenter.y < parentView.bounds.size.height-self.currentStacheView.frame.size.height/2+5) {
             
             self.currentStacheView.center = newCenter;
+            NSLog(@"newCenter.y%f",newCenter.y);
+            NSLog(@"parentView.bounds.size.height%f",parentView.bounds.size.height);
         }
         
         [gestureRecognizer setTranslation: CGPointZero inView: parentView];
@@ -2078,27 +2783,31 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 
 - (void)scaleStache: (UIPinchGestureRecognizer*)gestureRecognizer
 {
+    NSLog(@"gestureRecognizer.scale ==%f",gestureRecognizer.scale);
     if ( gestureRecognizer.state == UIGestureRecognizerStateBegan
         || gestureRecognizer.state == UIGestureRecognizerStateChanged )  {
         
         if ( gestureRecognizer.scale < 1.0
-            && self.currentStacheView.frame.size.width <= 40.0) {
+            && self.currentStacheView.frame.size.width <= 0.0) {
             
-            gestureRecognizer.scale = 1;
+            gestureRecognizer.scale = 0.5;
+            
             return;
         }
         else if ( 1.0 < gestureRecognizer.scale
                  && ( self.view.frame.size.width <= self.currentStacheView.frame.size.width
                      || self.view.frame.size.width <= self.currentStacheView.frame.size.height ) ) {
-            
-            gestureRecognizer.scale = 1;
-            return;
-        }
+                     NSLog(@"1.0 < gestureRecognizer.scale");
+                     gestureRecognizer.scale = 1;
+                     return;
+                 }
         else {
+            NSLog(@"else < gestureRecognizer.scale");
             [self.currentStacheView scaleTo: gestureRecognizer.scale];
             gestureRecognizer.scale = 1;
         }
     }
+
 }
 
 
@@ -2125,7 +2834,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 {
     if ( gestureRecognizer.state == UIGestureRecognizerStateEnded ) {
         [self hideHelpOverlay: self];
-    }    
+    }
 }
 
 
@@ -2137,7 +2846,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     [self removeImageViewGestures];
     [self setMustacheBarButtonsEnabled: NO];
     [self updateColorIndicator];
-//    [self updateDollarButton];
+    //    [self updateDollarButton];
 }
 
 
@@ -2170,10 +2879,10 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     }
     
     [Flurry logEvent: @"OpenBannerForPack"
-               withParameters: [NSDictionary dictionaryWithObjectsAndKeys: pack.name, @"PackName",
-                                sourceCurtain, @"BannerSource",
-                                nil]
-                        timed: NO];
+      withParameters: [NSDictionary dictionaryWithObjectsAndKeys: pack.name, @"PackName",
+                       sourceCurtain, @"BannerSource",
+                       nil]
+               timed: NO];
     
     [self closeCurtain: curtainView withCompletion: ^(BOOL finished){
         [self showCurtainForPack: pack];
@@ -2184,8 +2893,8 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 - (void)buyNowPressedForPack: (DMPack*)pack curtainView: (id)curtainView
 {
     [Flurry logEvent: @"BuyNowPack"
-               withParameters: [NSDictionary dictionaryWithObjectsAndKeys: pack.name, @"PackName", nil]
-                        timed: NO];
+      withParameters: [NSDictionary dictionaryWithObjectsAndKeys: pack.name, @"PackName", nil]
+               timed: NO];
     
     [[DataModel sharedInstance] purchasePack: pack];
 }
@@ -2217,11 +2926,11 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     
     self.currentStacheView = stacheView;
     self.currentStacheView.enabled = YES;
-    [self.imageView bringSubviewToFront: self.currentStacheView];
+   // [self.imageView bringSubviewToFront: self.currentStacheView];
     
     [self addImageViewGestures];
     [self updateColorIndicator];
-//    [self updateDollarButton];
+    //    [self updateDollarButton];
     [self setMustacheBarButtonsEnabled: YES];
 }
 
@@ -2233,7 +2942,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     if ( alertView == self.tsaiclipAlert ) {
         if ( buttonIndex != alertView.cancelButtonIndex ) {
             [Flurry logEvent: @"OpenTsaiClip"
-                       withParameters: [NSDictionary dictionaryWithObjectsAndKeys: @"PictureEdit", @"screen", nil]];
+              withParameters: [NSDictionary dictionaryWithObjectsAndKeys: @"PictureEdit", @"screen", nil]];
             [[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"http://zfer.us/fl2Rl?d=http://www.tsaiclip.com/products/moustache-tie-clip"]];
         }
         else {
@@ -2251,7 +2960,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 
 - (void)adViewDidFinishLoad:(MobclixAdView*)adView
 {
-//	debug(@"Ad Loaded: %@.", NSStringFromCGSize(adView.frame.size));
+    //	debug(@"Ad Loaded: %@.", NSStringFromCGSize(adView.frame.size));
     
     if ( nil == self.mobclixAdView.superview ) {
         [self.view addSubview: self.mobclixAdView];
@@ -2297,7 +3006,7 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
     NSLog(@"[RevMob Delegate] Ad loaded.");
     
     if ( nil == self.revMobBannerView.superview ) {
-        [self.view addSubview: self.revMobBannerView];
+       // [self.view addSubview: self.revMobBannerView];
     }
     
     self.isRevMobBannerLoaded = YES;
@@ -2355,9 +3064,9 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 
 - (void)removeAdBanner
 {
-    [self removeMobclixAd];
-    [self removeRevMobBanner];
-    [self removeFlurryBanner];
+    //[self removeMobclixAd];
+    //[self removeRevMobBanner];
+  //  [self removeFlurryBanner];
 }
 
 
@@ -2366,10 +3075,46 @@ static NSString *kTsaiclipBaseName = @"tie-clip";
 - (void)hudWasHidden:(MBProgressHUD *)hud
 {
 	[hud removeFromSuperview];
-	self.hud = nil;
+   	self.hud = nil;
+    [self addStache:self];//show curtain
+    
 }
 
-
+-(void)curtainViewShow:(id)sender{
+    if ( [DataModel sharedInstance].redrawMusctaheCurtain ) {
+        [self.mustacheCurtainView clearCurtain];
+        [self.mustacheCurtainView renderStaches];
+        [DataModel sharedInstance].redrawMusctaheCurtain = NO;
+    }
+    
+   // [self.view bringSubviewToFront: self.mustacheCurtainView];
+    
+    // if ( sender == self.addMustacheButton.button ) {
+    //   [Flurry logEvent: @"OpenStacheSelectionForAdding"];
+    self.callerMustacheButton = self.addMustacheButton;
+    //}
+    //else if ( sender == self.changeMustacheButton.button ) {
+    //  [Flurry logEvent: @"OpenStacheSelectionForChanging"];
+    //self.callerMustacheButton = self.changeMustacheButton;
+    // }
+    // else {
+    //   error(@"ACHTUNG! no parent HighlightedButton found for button: %@", sender);
+    //}
+    
+    [UIView animateWithDuration: 0.3
+                          delay: 0.0
+                        options: UIViewAnimationOptionCurveEaseOut
+                     animations: ^{
+                         self.mustacheCurtainView.frame = self.view.bounds;
+                     }
+                     completion: ^(BOOL finished) {
+                         self.isCurtainShown = YES;
+                       //  [self makeTopMostView: self.mustacheCurtainView];
+                     }
+     ];
+    
+    
+}
 #pragma FlurryAdDelegate
 
 - (void) spaceDidReceiveAd:(NSString*)adSpace

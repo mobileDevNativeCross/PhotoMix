@@ -28,6 +28,9 @@
                                                ofType: @"png"
                                           inDirectory: [NSString stringWithFormat: @"staches/%@/thumb", self.path]];
     }
+    NSLog(@" stache.baseName==%@", [[NSBundle mainBundle] pathForResource: stache.baseName
+                                                                   ofType: @"png"
+                                                              inDirectory: [NSString stringWithFormat: @"staches/%@/thumb", self.path]]);
     return [[NSBundle mainBundle] pathForResource: stache.baseName
                                            ofType: @"png"
                                       inDirectory: [NSString stringWithFormat: @"staches/%@/thumb", self.path]];
@@ -39,9 +42,10 @@
     UIImage *image = [UIImage imageWithContentsOfFile: [self pathForThumb: stache]];
     if ( nil == image ) {
         error(@"FAILED loading image for stache: %@", stache);
+        //NSLog(@"imageforThumb==%@",[self pathForThumb: stache]);
         return nil;
     }
-    
+     NSLog(@"imageforThumb==%@",[self pathForThumb: stache]);
     return image;
 }
 
@@ -53,8 +57,10 @@
                                                           inDirectory: [NSString stringWithFormat: @"staches/%@/mustache", self.path]]
                        filteredArrayUsingPredicate: [NSPredicate predicateWithFormat: @"SELF contains[cd] %@",
                                                      stache.baseName]];
+   // NSLog(@"paths-====%@",stache.baseName);
     NSMutableArray *imagesArray = [[NSMutableArray alloc] init];
     for ( NSString *path in paths ) {
+         NSLog(@"paths====%@",path);
 //        NSRange atRange = [path rangeOfString: @"@"];
 //        if ( 0 == atRange.length ) {
 //            //[imagesArray addObject: [UIImage imageWithContentsOfFile: path]];

@@ -10,6 +10,8 @@
 #import <Social/Social.h>
 #import <Accounts/Accounts.h>
 
+#import "StartPageViewController.h"
+
 #import "InfoViewController.h"
 #import "GUIHelper.h"
 #import "Flurry.h"
@@ -19,6 +21,7 @@
 #import "InfoScreenButton.h"
 #import "AppDelegate.h"
 #import "DataModel.h"
+#import "MKStoreManager.h"
 
 @interface InfoViewController ()
 {
@@ -102,14 +105,131 @@
 {
     self.view = [[UIView alloc] initWithFrame: [UIScreen mainScreen].applicationFrame];
 }
+-(void)restore{
+[[MKStoreManager sharedManager]restorePreviousTransactionsOnComplete:^{NSLog(@"RESTORED PREVIOUS PURCHASE");} onError:nil];
+}
+-(void)moreGames{
+    
+    
+    
+    UILabel *AppName = [[UILabel alloc] initWithFrame:CGRectMake(20, self.view.frame.size.height/3*2-10, 320, 60)];
+   // AppName.numberOfLines  = 2;
+    AppName.font = [UIFont fontWithName: @"Helvetica-Light" size: 18];
+    AppName.textColor = [UIColor whiteColor];
+    AppName.text =@"Наши другие приложения:";
+    [self.view addSubview:AppName];
+    
+    
+    
+    UIImageView *icon =    [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icons.png"]];
+    icon.frame = CGRectMake(20, self.view.frame.size.height-145, icon.frame.size.width/2, icon.frame.size.height/2);
+    [self.view addSubview:icon];//
+    
+    UIButton *button = [UIButton buttonWithType: UIButtonTypeCustom];
+    //button.layer.borderWidth = 4;
+    // button.layer.borderColor = [UIColor redColor].CGColor;
+    [button setImage: icon.image forState: UIControlStateNormal];
+    [self.view addSubview:button];
+    
+    
+//restore button
+    UIButton *Restoerebutton = [[UIButton alloc]initWithFrame:CGRectMake((self.view.frame.size.width-90)/2, self.view.frame.size.height-90, 90, 44)];
+    [Restoerebutton setTitle:@"Restore" forState:UIControlStateNormal];
+    [Restoerebutton addTarget:self action:@selector(restore) forControlEvents:UIControlEventTouchUpInside];
+    [Restoerebutton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [self.view addSubview:Restoerebutton];
+    
+}
+-(void)makeIconsAndText{
+    [self moreGames ];
+    //  UIImageView *icon= [UIImage imageNamed: @"icons.png"];
+    UIImageView *icon =    [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"appIcon.png"]];
+    
+    icon.frame = CGRectMake(20, 82, icon.frame.size.width-30, icon.frame.size.height-30);
+    [self.view addSubview:icon];//
+    
+    UIImageView *line_paterrn =    [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"line_paterrn.png"]];
+    line_paterrn.frame = CGRectMake(0, self.view.frame.size.height/3*2, line_paterrn.frame.size.width, line_paterrn.frame.size.height);
+    [self.view addSubview:line_paterrn];//patern
+    UILabel *AppName = [[UILabel alloc] initWithFrame:CGRectMake(146, self.view.frame.size.height/6, 120, 60)];
+    AppName.numberOfLines  = 2;
+     AppName.font = [UIFont fontWithName: @"Helvetica-Light" size: 24];
+    AppName.textColor = [UIColor whiteColor];
+    AppName.text =@"ФотоМикс";
+    [self.view addSubview:AppName];
+    
+    UILabel *Description = [[UILabel alloc] initWithFrame:CGRectMake(20, 210, self.view.frame.size.width, 30)];
+    NSLog(@"GGGG===%f",self.view.frame.size.height/3);
+   // Description.backgroundColor = [UIColor redColor];
+    //Description.numberOfLines  = 200;
+    Description.font = [UIFont fontWithName: @"Helvetica-Light" size: 18];
+    Description.textColor = [UIColor whiteColor];
+    Description.text =@"Фотомикс";
+    [self.view addSubview:Description];
+    UITextView *descText = [[UITextView alloc]initWithFrame:CGRectMake(20, 232, 270, 65)];
+    descText.backgroundColor = [UIColor clearColor];
+    descText.editable = NO;
+    descText.textColor = [UIColor whiteColor];
+    descText.userInteractionEnabled  =YES;
+    descText.text = @"ОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписаниеОписание3";
+    [self.view addSubview:descText];
+    
+    
+    UILabel *Contacts = [[UILabel alloc] initWithFrame:CGRectMake(20, 290, 120, 30)];
+    Contacts.font = [UIFont fontWithName: @"Helvetica-Light" size: 18];
+    Contacts.textColor = [UIColor whiteColor];
+    Contacts.text =@"Контакты:";
+    Contacts.numberOfLines = 3;
+    [self.view addSubview:Contacts];
 
-
+    
+    
+    UILabel *mail = [[UILabel alloc] initWithFrame:CGRectMake(26, 320, 120, 15)];
+    mail.font = [UIFont fontWithName: @"Helvetica-Light" size: 12];
+    mail.textColor = [UIColor whiteColor];
+    mail.text =@"pochta@mail.ru";
+    mail.numberOfLines = 3;
+    [self.view addSubview:mail];
+    
+    UILabel *site = [[UILabel alloc] initWithFrame:CGRectMake(26, 335, 120, 15)];
+    site.font = [UIFont fontWithName: @"Helvetica-Light" size: 12];
+    site.textColor = [UIColor whiteColor];
+    site.text =@"www.kruto.ru";
+    //site.numberOfLines = 3;
+    [self.view addSubview:site];
+    
+    
+    
+    UILabel *VersName = [[UILabel alloc] initWithFrame:CGRectMake(146, self.view.frame.size.height/4.5, 160, 60)];
+    VersName.numberOfLines  = 2;
+    VersName.font = [UIFont fontWithName: @"Helvetica-Light" size: 18];
+    VersName.textColor = [UIColor whiteColor];
+    VersName.text =@"1.01 2014 версия";
+    [self.view addSubview:VersName];
+    
+    
+    
+    
+    
+}
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    [self makeIconsAndText];
     [self createNavBar];
+    UIImageView *bototmV = [[UIImageView alloc]initWithFrame:CGRectMake(0, 400, 320, 40)];
+  bototmV.image =   [UIImage imageNamed: @"bottom_bar_black.png"];
+    
+    bototmV.frame = CGRectMake(0, 500, 320, bototmV.image.size.height);
+    [self.view addSubview:bototmV];
     NSString * language = [[NSLocale preferredLanguages] objectAtIndex:0];
+    UILabel *labelFollow = [[UILabel alloc]initWithFrame:CGRectMake(0, 508, 70, 65)];
+    labelFollow.textColor = [UIColor whiteColor];
+        labelFollow.font = [UIFont fontWithName: @"Helvetica-Light" size: 18];
+    labelFollow.text  =@"Следите за нами:";
+   // labelFollow.backgroundColor = [UIColor redColor];
+    labelFollow.numberOfLines = 2;
+    [self.view addSubview:labelFollow];
     
     // SHARE by Facebook button
     CGFloat shareFacebookLabelWidth = 0.0;
@@ -176,13 +296,13 @@
     
     // Facebook logout
     self.facebookLogout =
-    [[InfoScreenButton alloc] initWithButton: [self buttonWithImageNamed: @"Logout-FB"
-                                                                  target: [FacebookManager sharedInstance]
-                                                                  action: @selector(logOut)]
-                                        text: NSLocalizedString(@"Logout of Facebook", @"Info screen button title")
+    [[InfoScreenButton alloc] initWithButton: [self buttonWithImageNamed: @"vkontakte"
+                                                                  target: self                                                                  action: @selector(vkontakte:)]
+                                        text: @""
                          labelWidthExtension: 0.0];
     
-    self.facebookLogout.button.enabled = [[FacebookManager sharedInstance] isLoggedIn];
+    self.facebookLogout.button.enabled = YES;
+    //[[FacebookManager sharedInstance] isLoggedIn];
 
     //follow FaceBook
     CGFloat followFbLabelWidth = 0.0;
@@ -190,18 +310,18 @@
         followFbLabelWidth = 12.0;
 
     self.followFbButton =
-    [[InfoScreenButton alloc] initWithButton: [self buttonWithImageNamed: @"Follow-on-FB"
+    [[InfoScreenButton alloc] initWithButton: [self buttonWithImageNamed: @"facebook_follow"
                                                                   target: self
                                                                   action: @selector(followFacebook:)]
-                                        text: NSLocalizedString(@"Follow on Facebook", @"Info screen button title")
+                                        text:@""
                          labelWidthExtension: followFbLabelWidth];
     
     //follow Twitter
     self.followTwButton =
-    [[InfoScreenButton alloc] initWithButton: [self buttonWithImageNamed: @"Follow-on-TW"
+    [[InfoScreenButton alloc] initWithButton: [self buttonWithImageNamed: @"instaramm"
                                                                   target: self
                                                                   action: @selector(followTwitter:)]
-                                        text: NSLocalizedString(@"Follow on Twitter", @"Info screen button title")
+                                        text: @""
                          labelWidthExtension:  0.0];
     
     // DRAW rows
@@ -216,13 +336,13 @@
     
     
     NSArray *row1 = [NSArray arrayWithObjects: self.shareFacebookButton, self.shareTwitterButton, self.shareEmailButton, nil];
-    [self drawInfoButtons: row1 withCenterHeight: firstRowY];
+  //  [self drawInfoButtons: row1 withCenterHeight: firstRowY];
     
     NSArray *row2 = [NSArray arrayWithObjects: self.inviteFriendsButton, self.contactSupportButton, self.reviewOnAppstoreButton, nil];
-    [self drawInfoButtons: row2 withCenterHeight: firstRowY + rowDelta];
+  //  [self drawInfoButtons: row2 withCenterHeight: firstRowY + rowDelta];
     
-    NSArray *row3 = [NSArray arrayWithObjects: self.facebookLogout, self.followFbButton, self.followTwButton, nil];
-    [self drawInfoButtons: row3 withCenterHeight: firstRowY + 2 * rowDelta];
+    NSArray *row3 = [NSArray arrayWithObjects: self.facebookLogout, self.followFbButton,self.followTwButton, nil];
+    [self drawInfoButtons: row3 withCenterHeight: 340 + 2 * rowDelta];
     
     // Legal button
     self.legalButton =
@@ -231,7 +351,7 @@
                                                                   action: @selector(openLegal:)]
                                         text: NSLocalizedString(@"Legal", @"Info screen button title")
                          labelWidthExtension: 0.0];
-    [self.view addSubview: self.legalButton];
+   // [self.view addSubview: self.legalButton];
     
     // SMS button
     //if ( [MFMessageComposeViewController canSendText] ) {
@@ -240,9 +360,10 @@
                                                                                        action: @selector(openSMSComposer:)]
                                                                  text: NSLocalizedString(@"Share via SMS", @"Info screen button title")
                                                   labelWidthExtension: 0.0];
-        [self.view addSubview: self.smsButton];
+      //  [self.view addSubview: self.smsButton];
      //}
     
+
     // Tie clip Button
 //    self.tieClipButton =
 //    [[InfoScreenButton alloc] initWithButton: [self buttonWithImageNamed: @"Tie-clip"
@@ -273,7 +394,7 @@
         [row4 addObject: self.restoreButton];
     #endif
     
-    [self drawInfoButtons: row4 withCenterHeight: firstRowY + 3 * rowDelta];
+    [self drawInfoButtons: row4 withCenterHeight: firstRowY + 3 * 10000];
 
     // Copyright label
     UILabel *copyrightLabel;
@@ -293,7 +414,7 @@
     }
     copyrightLabel.textColor = [UIColor colorWithRed: 0.17 green: 0.1 blue: 0.04 alpha: 1.0];
     copyrightLabel.backgroundColor = [UIColor clearColor];
-    copyrightLabel.text = NSLocalizedString( @"© BrightNewt 2013", @"Info screen copyright");
+   // copyrightLabel.text = NSLocalizedString( @"© BrightNewt 2013", @"Info screen copyright");
     copyrightLabel.textAlignment = NSTextAlignmentCenter;
     [self.view addSubview: copyrightLabel];
 }
@@ -310,7 +431,7 @@
 {
     [super viewWillAppear: animated];
     [FacebookManager sharedInstance].loginDelegate = self;
-    self.facebookLogout.button.enabled = [[FacebookManager sharedInstance] isLoggedIn];
+    self.facebookLogout.button.enabled = YES;//[[FacebookManager sharedInstance] isLoggedIn];
 }
 
 
@@ -331,19 +452,19 @@
 
 - (void)createNavBar
 {
-    [super createNavBar];
-    [self createLeftNavBarButtonWithTitle: NSLocalizedString(@"Close", @"Info screen nav bar button") target: self action: @selector(goBack:)];
+     [super createNavBar];
+    [self createLeftNavBarButtonWithTitle: NSLocalizedString(@"", @"Info screen nav bar button") target: self action: @selector(goBack:)];
     
     NSString *title;
     CGFloat fontSize;
     
 #if MB_LUXURY
-    title = [NSString stringWithFormat: NSLocalizedString(@"Mustache Bash Luxury v%@", @"Info screen nav bar title"),
-             [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey]];
+   // title = [NSString stringWithFormat: NSLocalizedString(@"Mustache Bash Luxury v%@", @"Info screen nav bar title"),
+     //       [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey]];
     fontSize = 16.0;
 #else
-    title = [NSString stringWithFormat: NSLocalizedString(@"Mustache Bash v%@", @"Info screen nav bar title"),
-             [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey]];
+   // title = [NSString stringWithFormat: NSLocalizedString(@"Mustache Bash v%@", @"Info screen nav bar title"),
+     //        [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey]];
     fontSize = 20.0;
     // Sun - ipad
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
@@ -376,19 +497,19 @@
     }
     
     UIImage *buttonImage = [UIImage imageNamed: imageName];
-    UIImage *buttonPressedImage = [UIImage imageNamed: [NSString stringWithFormat: @"%@-pressed", imageName]];
+ //   UIImage *buttonPressedImage = [UIImage imageNamed: [NSString stringWithFormat: @"%@-pressed", imageName]];
     // Sun - iPad support
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
         buttonImage = [UIImage imageNamed: [NSString stringWithFormat: @"%@-ipad", imageName]];
-        buttonPressedImage = [UIImage imageNamed: [NSString stringWithFormat: @"%@-ipad-pressed", imageName]];
+       // buttonPressedImage = [UIImage imageNamed: [NSString stringWithFormat: @"%@-ipad-pressed", imageName]];
     }
     
 	UIButton *button = [UIButton buttonWithType: UIButtonTypeCustom];
     
     [button setImage: buttonImage forState: UIControlStateNormal];
     
-    [button setImage: buttonPressedImage forState: UIControlStateHighlighted];
-    button.frame= CGRectMake(0, 0, buttonImage.size.width, buttonImage.size.height);
+  //  [button setImage: buttonPressedImage forState: UIControlStateHighlighted];
+    button.frame= CGRectMake(0, 0, buttonImage.size.width/1.7, buttonImage.size.height/1.3);
     
 	[button addTarget: target action: action forControlEvents: UIControlEventTouchUpInside];
 
@@ -411,7 +532,7 @@
             if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
             {
                 UIView *btn1 = [buttons objectAtIndex: 0];
-                btn1.center = CGPointMake(round(70.0 + 0.5 * btn1.bounds.size.width), centerHeight);
+                btn1.center = CGPointMake(round(100.0 + 0.5 * btn1.bounds.size.width), centerHeight);
                 
                 UIView *btn2 = [buttons objectAtIndex: 1];
                 btn2.center = CGPointMake(390, centerHeight);
@@ -421,13 +542,13 @@
             }
             else{
                 UIView *btn1 = [buttons objectAtIndex: 0];
-                btn1.center = CGPointMake(round(25.0 + 0.5 * btn1.bounds.size.width), centerHeight);
+                btn1.center = CGPointMake(round(80.0 + 0.5 * btn1.bounds.size.width), centerHeight);
                 
                 UIView *btn2 = [buttons objectAtIndex: 1];
-                btn2.center = CGPointMake(160, centerHeight);
+                btn2.center = CGPointMake(201, centerHeight);
                 
                 UIView *btn3 = [buttons objectAtIndex: 2];
-                btn3.center = CGPointMake(round(320 - 25.0 - 0.5 * btn3.bounds.size.width), centerHeight);
+                btn3.center = CGPointMake(round(320  - 0.5 * btn3.bounds.size.width), centerHeight+2);
             }
                       
             
@@ -477,7 +598,12 @@
 - (void)goBack: (id)sender
 {
     [Flurry logEvent: @"GoBackToStartPage"];
-    [self.parentViewController dismissModalViewControllerAnimated: YES];
+  //  [self.view dismissModalViewControllerAnimated: YES];
+  //  [self dismissModalViewControllerAnimated:YES];
+    StartPageViewController *t =[StartPageViewController new];
+    [self.navigationController pushViewController:t animated:NO];
+    
+   // [self dismissViewControllerAnimated:YES completion:Nil];
 }
 
 
@@ -556,7 +682,7 @@
 - (void)shareTwitter: (id)sender
 {
     [Flurry logEvent: @"AppShareToTw"];
-    
+    NSLog(@"shareTwitter");
     Class tweeterClass = NSClassFromString(@"TWTweetComposeViewController");
     
     if ( nil != tweeterClass ) {   // iOS5.0 twitter
@@ -615,7 +741,7 @@
         return;
     }
     
-    [tcvc setInitialText: NSLocalizedString(@"Check out this hilarious app @mustachebashapp!", @"Info screen - share app via twitter - tweet text") ];
+    [tcvc setInitialText: NSLocalizedString(@"Check out this hilarious app @photomix!", @"Info screen - share app via twitter - tweet text") ];
     [tcvc addImage: [UIImage imageNamed: @"Icon.png"]];
     
     //[tcvc addURL: [NSURL URLWithString: @"http://bit.ly/MustacheBash_tw"]];
@@ -670,14 +796,17 @@
     }
 }
 
-
+-(void)vkontakte: (id)sender
+{
+    [[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"http://www.vk.com/"]];
+}
 
 - (void)followFacebook: (id)sender
 {
     [Flurry logEvent: @"AppFollowFb"];
  
     if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"fb://"]]) {
-        [[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"fb://profile/299379506798067"]]; // FB App tied fan page
+    //    [[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"fb://profile/299379506798067"]]; // FB App tied fan page
     }
     else
         [[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"http://www.facebook.com/mustachebashapppage"]];
@@ -689,7 +818,7 @@
 {
     [Flurry logEvent: @"AppFollowTw"];
     //[[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"https://twitter.com/#!/mustachebashapp"]];
-    [[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"https://twitter.com/brightnewt"]];
+    [[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"http://instagram.com/"]];
 }
 
 

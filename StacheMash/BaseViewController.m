@@ -41,13 +41,14 @@
     // BG image
     UIImageView *bgImageView = [[UIImageView alloc] initWithFrame: self.view.bounds];
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-        bgImageView.image = [UIImage imageNamed: @"bg-@2x.png"];
+      //  bgImageView.image = [UIImage imageNamed: @"bg-@2x.png"];
     }else{
-    bgImageView.image = [UIImage imageNamed: @"bg-.png"];
+   // bgImageView.image = [UIImage imageNamed: @"bg-.png"];
     }
     bgImageView.userInteractionEnabled = YES;
     bgImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view addSubview: bgImageView];
+    
 }
 
 
@@ -103,11 +104,15 @@
     UIImage *buttonPressedImage = [UIImage imageNamed: pressedImageName];
 	
 	UIButton *button = [UIButton buttonWithType: UIButtonTypeCustom];
-    
+    //button.layer.borderWidth = 4;
+   // button.layer.borderColor = [UIColor redColor].CGColor;
     [button setImage: buttonImage forState: UIControlStateNormal];
     [button setImage: buttonPressedImage forState: UIControlStateHighlighted];
-    
-	button.frame = CGRectMake(0, 0, 44, 44);
+   // NSLog(@"imageName==%@",imageName);
+    if(![imageName isEqualToString:@"recycle"])
+	button.frame = CGRectMake(0, 0, buttonImage.size.width/2, buttonImage.size.height/2);
+    else
+    button.frame = CGRectMake(0, 0, buttonImage.size.width, buttonImage.size.height);
 	[button addTarget: target action: action forControlEvents: UIControlEventTouchUpInside];
     
     return button;
@@ -136,32 +141,26 @@
                                action: action];
 }
 
-
-- (void)createBottomToolbarWithButtons: (NSArray*)buttonsArray
+- (void)createBottomToolbar1: (NSArray*)buttonsArray
 {
-    if ( nil != self.toolbar ) {
-        error(@"toolbar is alread created");
-        return;
-    }
-    
-    // CREATE toolbar
-    //Sun-iPad support
     UIImage *barImage;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
         barImage = [UIImage imageNamed: @"bar-down-ipad.png"];
     }else{
-         barImage = [UIImage imageNamed: @"bar-down.png"];
+        barImage = [UIImage imageNamed: @"header_black.png"];
     }
     self.toolbar = [[UIImageView alloc] initWithFrame:
-                    CGRectMake(0,
-                               self.view.frame.size.height - barImage.size.height,
+                    CGRectMake(0,0
+                               /*self.view.frame.size.height - barImage.size.height*/,
                                self.view.frame.size.width,
-                               barImage.size.height)];
+                               barImage.size.height-20)];
     self.toolbar.userInteractionEnabled = YES;
     self.toolbar.image = barImage;
-    self.toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    //self.toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     [self.view addSubview: self.toolbar];
-
+   // self.toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    //[self.view addSubview: self.toolbar];
+    NSLog(@"self.toolbar==%@",self.toolbar);
     if ( 0 == [buttonsArray count] ) {
         error(@"empty array supplied");
         return;
@@ -189,6 +188,232 @@
     }
 }
 
+- (void)createBottomToolbarWithButtons: (NSArray*)buttonsArray
+{
+    if ( nil != self.toolbar ) {
+        error(@"toolbar is alread created");
+        return;
+    }
+    
+    // CREATE toolbar
+    //Sun-iPad support
+    UIImage *barImage;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
+        barImage = [UIImage imageNamed: @"bar-down-ipad.png"];
+    }else{
+         barImage = [UIImage imageNamed: @"bar-down.png"];
+    }
+    self.toolbar = [[UIImageView alloc] initWithFrame:
+                    CGRectMake(0,0
+                               /*self.view.frame.size.height - barImage.size.height*/,
+                               self.view.frame.size.width,
+                               barImage.size.height)];
+    self.toolbar.userInteractionEnabled = YES;
+    self.toolbar.image = barImage;
+    self.toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    [self.view addSubview: self.toolbar];
+
+    if ( 0 == [buttonsArray count] ) {
+        error(@"empty array supplied");
+        return;
+        
+    }
+    
+    // CALC positions
+    CGFloat occupiedSpace = 0;
+    for ( UIView *btn in buttonsArray ) {
+        occupiedSpace += btn.bounds.size.width;
+    }
+    
+    CGFloat freeSpace = self.view.frame.size.width - occupiedSpace;
+    CGFloat freeInterval = round(freeSpace / ([buttonsArray count] + 1));
+    
+    for ( int i = 0; i < [buttonsArray count]; i++ ) {
+        UIView *btn = [buttonsArray objectAtIndex: i];
+        btn.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+        
+        CGRect btnFrame = btn.frame;
+        if(i==0){
+            btnFrame.origin = CGPointMake(0,
+                                          0.5 * (barImage.size.height - btnFrame.size.height));
+        }
+        else{
+        btnFrame.origin = CGPointMake(/*freeInterval * (i + 1) +  i * btnFrame.size.width*/320-btnFrame.size.width,
+                                      0.5 * (barImage.size.height - btnFrame.size.height));
+        }
+        btn.frame = btnFrame;
+        //btn.layer.borderWidth = 1;
+      //  btn.layer.borderColor = [UIColor greenColor].CGColor;
+        
+        [self.toolbar addSubview: btn];
+    }
+}
+-(void)createBottomToolbarPurchase: (NSArray*)buttonsArray{
+    if ( nil != self.toolbar ) {
+        error(@"toolbar is alread created");
+        //   return;
+    }
+    
+    // CREATE toolbar
+    //Sun-iPad support
+    UIImage *barImage;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
+        barImage = [UIImage imageNamed: @"bar-down-ipad.png"];
+    }else{
+        barImage = [UIImage imageNamed: @"header_black.png"];
+    }
+     UIImageView *toolbar = [[UIImageView alloc] initWithFrame:
+                    CGRectMake(0,0
+                               /*self.view.frame.size.height - barImage.size.height*/,
+                               self.view.frame.size.width,
+                               barImage.size.height-40)];
+    toolbar.userInteractionEnabled = YES;
+    toolbar.image = barImage;
+    //self.toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    [self.view addSubview: toolbar];
+    
+    if ( 0 == [buttonsArray count] ) {
+        error(@"empty array supplied");
+        return;
+        
+    }
+    
+    // CALC positions
+    CGFloat occupiedSpace = 0;
+    for ( UIView *btn in buttonsArray ) {
+        occupiedSpace += btn.bounds.size.width;
+    }
+    
+    CGFloat freeSpace = self.view.frame.size.width - occupiedSpace;
+    CGFloat freeInterval = round(freeSpace / ([buttonsArray count] + 1));
+    
+    for ( int i = 0; i < [buttonsArray count]; i++ ) {
+        UIView *btn = [buttonsArray objectAtIndex: i];
+        //btn.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+        
+        CGRect btnFrame = btn.frame;
+        
+        if(i==0){
+            NSLog(@"IIIII==%d",i);
+            btnFrame.origin = CGPointMake(0,
+                                          /*0.5 * (barImage.size.height - btnFrame.size.height)*/5);
+            btn.frame = CGRectMake((320-btnFrame.size.width), 5, 120, 120);
+            [toolbar addSubview: btn];
+            btn.frame = btnFrame;
+        }
+        else if(i==1) {
+            NSLog(@"IIIII2==%d",i);
+            btnFrame.origin = CGPointMake(/*freeInterval * (i + 1) +  i * btnFrame.size.width*/145,
+                                          /*0.5 * (barImage.size.height - btnFrame.size.height)*/5);
+            btn.frame = CGRectMake((160+btnFrame.size.width), 5, barImage.size.width, barImage.size.height);
+            //  btn.layer.borderWidth  = 3;
+            // btn.layer.borderColor = [UIColor redColor].CGColor;
+            [toolbar addSubview: btn];
+            btn.frame = btnFrame;
+            
+        }
+        else if(i==2) {
+            NSLog(@"IIIII2==%d",i);
+            btnFrame.origin = CGPointMake(/*freeInterval * (i + 1) +  i * btnFrame.size.width*/320-btnFrame.size.width,
+                                          /*0.5 * (barImage.size.height - btnFrame.size.height)*/5);
+            btn.frame = CGRectMake((320-btnFrame.size.width), 5, 120, 120);
+            [toolbar addSubview: btn];
+            btn.frame = btnFrame;
+        }
+        
+        //btn.layer.borderWidth = 1;
+        //btn.layer.borderColor = [UIColor greenColor].CGColor;
+        
+        
+        [self.view bringSubviewToFront: toolbar];
+        //      self.toolbar.layer.borderWidth = 3;
+        //        self.toolbar.layer.borderColor = [UIColor greenColor].CGColor;
+        
+    }
+}
+
+-(void)createBottomToolbar: (NSArray*)buttonsArray{
+    if ( nil != self.toolbar ) {
+        error(@"toolbar is alread created");
+        return;
+    }
+    
+    // CREATE toolbar
+    //Sun-iPad support
+    UIImage *barImage;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
+        barImage = [UIImage imageNamed: @"bar-down-ipad.png"];
+    }else{
+        barImage = [UIImage imageNamed: @"header_black.png"];
+    }
+    self.toolbar = [[UIImageView alloc] initWithFrame:
+                    CGRectMake(0,0
+                               /*self.view.frame.size.height - barImage.size.height*/,
+                               self.view.frame.size.width,
+                               barImage.size.height-40)];
+    self.toolbar.userInteractionEnabled = YES;
+    self.toolbar.image = barImage;
+    //self.toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    [self.view addSubview: self.toolbar];
+    
+    if ( 0 == [buttonsArray count] ) {
+        error(@"empty array supplied");
+        return;
+        
+    }
+    
+    // CALC positions
+    CGFloat occupiedSpace = 0;
+    for ( UIView *btn in buttonsArray ) {
+        occupiedSpace += btn.bounds.size.width;
+    }
+    
+    CGFloat freeSpace = self.view.frame.size.width - occupiedSpace;
+    CGFloat freeInterval = round(freeSpace / ([buttonsArray count] + 1));
+    
+    for ( int i = 0; i < [buttonsArray count]; i++ ) {
+        UIView *btn = [buttonsArray objectAtIndex: i];
+        //btn.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+        
+        CGRect btnFrame = btn.frame;
+       
+        if(i==0){
+           
+            btnFrame.origin = CGPointMake(0,
+                                          /*0.5 * (barImage.size.height - btnFrame.size.height)*/5);
+             btn.frame = CGRectMake((320-btnFrame.size.width), 5, 120, 120);
+             [self.toolbar addSubview: btn];
+             btn.frame = btnFrame;
+        }
+        else if(i==1) {
+              NSLog(@"IIIII==%f",barImage.size.width);            btnFrame.origin = CGPointMake(/*freeInterval * (i + 1) +  i * btnFrame.size.width*/145,
+                                         /*0.5 * (barImage.size.height - btnFrame.size.height)*/5);
+            btn.frame = CGRectMake((160+btnFrame.size.width), 5, barImage.size.width, barImage.size.height);
+          //  btn.layer.borderWidth  = 3;
+           // btn.layer.borderColor = [UIColor redColor].CGColor;
+[self.toolbar addSubview: btn];
+             btn.frame = btnFrame;
+           
+        }
+        else if(i==2) {
+            NSLog(@"IIIII2==%d",i);
+            btnFrame.origin = CGPointMake(/*freeInterval * (i + 1) +  i * btnFrame.size.width*/320-btnFrame.size.width,
+                                          /*0.5 * (barImage.size.height - btnFrame.size.height)*/5);
+            btn.frame = CGRectMake((320-btnFrame.size.width), 5, 120, 120);
+            [self.toolbar addSubview: btn];
+             btn.frame = btnFrame;
+        }
+       
+        //btn.layer.borderWidth = 1;
+        //btn.layer.borderColor = [UIColor greenColor].CGColor;
+        
+       
+        [self.view bringSubviewToFront: self.toolbar];
+  //      self.toolbar.layer.borderWidth = 3;
+//        self.toolbar.layer.borderColor = [UIColor greenColor].CGColor;
+        
+    }
+}
 
 - (void)updateBottomToolbarToInterfaceOrientation: (UIInterfaceOrientation)interfaceOrientation
 {
@@ -218,16 +443,18 @@
     //iPad support
     UIImage *barImage;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-        barImage = [UIImage imageNamed: @"bar-up-ipad.png"];
+        barImage = [UIImage imageNamed: @"header_black.png"];
     }else{
         
-        barImage = [UIImage imageNamed: @"bar-up.png"];
+        barImage = [UIImage imageNamed: @"header_black.png"];
     }
     
     self.navBar = [[UIImageView alloc] initWithFrame:
-                       CGRectMake(0, 0, self.view.frame.size.width,
-                                  barImage.size.height)];
+                   CGRectMake(0, 0, self.view.frame.size.width,
+                              barImage.size.height-40)];
    
+    
+    
     self.navBar.userInteractionEnabled = YES;
     self.navBar.image = barImage;
     [self.view addSubview: self.navBar];
@@ -239,12 +466,12 @@
     UIImage *buttonImage, *buttonPressedImage;
     //Sun-ipad support
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-        buttonImage = [UIImage imageNamed: @"btn-Left-ipad.png"];
-        buttonPressedImage = [UIImage imageNamed: @"btn-Left-ipad-pressed.png"];
+        buttonImage = [UIImage imageNamed: @""];
+        buttonPressedImage = [UIImage imageNamed: @"btn-Right-ipad-pressed.png"];
     }else{
         
-        buttonImage = [UIImage imageNamed: @"btn-Left.png"];
-        buttonPressedImage = [UIImage imageNamed: @"btn-Left-pressed.png"];
+    buttonImage = [UIImage imageNamed: @""];
+        buttonPressedImage = [UIImage imageNamed: @"btn-Right-pressed.png"];
     }
 
 	UIButton *button = [UIButton buttonWithType: UIButtonTypeCustom];
@@ -252,17 +479,18 @@
     [button setBackgroundImage: buttonImage forState: UIControlStateNormal];
     [button setBackgroundImage: buttonPressedImage forState: UIControlStateHighlighted];
     
-	button.frame= CGRectMake(6, 0.5 * (self.navBar.bounds.size.height - buttonImage.size.height),
-                             buttonImage.size.width, buttonImage.size.height);
+	button.frame= CGRectMake(6, 0.5 * (self.navBar.bounds.size.height - 60),
+                             60, 60);
 	
-    [button setTitle: title forState: UIControlStateNormal];
+    [button setTitle: @"back" forState: UIControlStateNormal];
     button.titleLabel.textColor = [UIColor colorWithRed: 0.88 green: 0.80 blue: 0.58 alpha: 1.0];
     //Sun - ipad
-    int sizeFont = 13;
+    int sizeFont = 21;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
         sizeFont = 26;
     }
     button.titleLabel.font = [UIFont systemFontOfSize: sizeFont];
+    
     
     [button addTarget: target action: action forControlEvents: UIControlEventTouchUpInside];
     
@@ -275,11 +503,11 @@
     UIImage *buttonImage, *buttonPressedImage;
     //Sun-ipad support
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-        buttonImage = [UIImage imageNamed: @"btn-Right-ipad.png"];
+        buttonImage = [UIImage imageNamed: @""];
         buttonPressedImage = [UIImage imageNamed: @"btn-Right-ipad-pressed.png"];
     }else{
                 
-        buttonImage = [UIImage imageNamed: @"btn-Right.png"];
+        buttonImage = [UIImage imageNamed: @""];
         buttonPressedImage = [UIImage imageNamed: @"btn-Right-pressed.png"];
     }
 
@@ -288,14 +516,14 @@
     [button setBackgroundImage: buttonImage forState: UIControlStateNormal];
     [button setBackgroundImage: buttonPressedImage forState: UIControlStateHighlighted];
     
-	button.frame= CGRectMake(self.navBar.bounds.size.width - buttonImage.size.width - 6,
-                             0.5 * (self.navBar.bounds.size.height - buttonImage.size.height),
-                             buttonImage.size.width, buttonImage.size.height);
-	
+	button.frame= CGRectMake(self.navBar.bounds.size.width - 60 - 6,
+                             0.5 * (self.navBar.bounds.size.height - 60),
+                             60, 60);
+	 
     [button setTitle: title forState: UIControlStateNormal];
-    button.titleLabel.textColor = [UIColor colorWithRed: 0.88 green: 0.80 blue: 0.58 alpha: 1.0];
+    button.titleLabel.textColor = [UIColor /*colorWithRed: 0.88 green: 0.80 blue: 0.58 alpha: 1.0*/whiteColor];
     //Sun - ipad
-    int sizeFont = 13;
+    int sizeFont = 21;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
         sizeFont = 26;
     }

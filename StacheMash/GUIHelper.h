@@ -34,6 +34,11 @@
 #pragma mark Overlaying bg
 + ( UIImage* ) imageByCropping: ( UIImage* ) imageToCrop toRect: ( CGRect ) rect;
 + ( UIImage* ) imageByScaling: ( UIImage* ) imageToScale toSize: ( CGSize ) targetSize;
+
++ ( UIImage* ) ScalingForIG: ( UIImage* ) imageToScale toSize: ( CGSize ) targetSize;
+
++ ( UIImage* ) imageByScalingMY: ( UIImage* ) imageToScale toSize: ( CGSize ) targetSize;
+
 + ( UIView* ) overlayBgViewWithFrame: ( CGRect ) frame alpha: ( float ) alpha;
 + ( UIImage* ) imageFromView: ( UIView* ) view;
 + (NSData*)scaledItemNSDataImageWith: (NSData*)sourceData;

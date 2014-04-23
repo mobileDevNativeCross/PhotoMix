@@ -119,8 +119,8 @@ NSString *const MBSessionStateChangedNotification = @"com.brightnewt.mustachebas
 
 - (void)logOut
 {
-    [Flurry logEvent: @"LogOutFacebook"];
-    [FBSession.activeSession close];
+   // [Flurry logEvent: @"LogOutFacebook"];
+    //[FBSession.activeSession close];
 }
 
 

@@ -1,6 +1,6 @@
 //
 //  DataModel.h
-//  MustacheBash
+//  Dental
 //
 //  Created by Konstantin Sokolinskyi on 2/23/12.
 //  Copyright (c) 2012 Bright Newt. All rights reserved.

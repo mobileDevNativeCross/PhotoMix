@@ -22,6 +22,7 @@
 
 - (BOOL)_hasPropertyNamed: (NSString*)propertyName
 {
+   // NSLog(@"propertyName==%@",propertyName);
 	return ( nil != [m_propertyDict objectForKey: propertyName] );
 }
 
@@ -29,30 +30,36 @@
 - (id)init
 {
 	self = [self initWithDictionary: nil];
-	
+	[self prefersStatusBarHidden];
 	return self;
 }
 
 
 - (id) initWithDictionary: (NSDictionary*)dict
-{	
+{
+   // NSLog(@"dict+==%@",dict);
 	if ( self = [super init] ) {
 		m_propertyDict = [self propertyDictionary];
 		
 		if ( nil != dict ) {
 			NSArray *keys = [dict allKeys];
-			
+			//NSLog(@"DICT KEYS==%@",[dict allKeys]);
 			for ( NSString *key in keys ) {
-				if ( [self _hasPropertyNamed: key] ) {
+				if ( [self _hasPropertyNamed: (NSString*)key] ) {
+              //      NSLog(@"key===%@",key);
+                //    NSLog(@"[dict objectForKey: key]==%@",[dict objectForKey: key]);
 					[self setValue: [dict objectForKey: key] forKey: key];
 				}
+                
 			}
 		}
 	}
+    
+ //   NSLog(@"self+==%@",self);
 	return self;
 }
 
-
+-(BOOL)prefersStatusBarHidden {   return YES; }
 - (NSString*)description
 {	
 	NSString *str = [NSString stringWithFormat: @"%@: ", NSStringFromClass([self class])];

@@ -15,8 +15,13 @@
 #import "MustacheCurtainView.h"
 #import "JTLabel.h"
 
+#import "MKStoreManager.h"
 
-@interface MustachePackView ()
+
+@interface MustachePackView (){
+    int i;
+    NSUserDefaults *defs;
+}
 
 @property (strong, nonatomic) UIImageView *greenBar;
 @property (strong, nonatomic) UIButton *bannerButton;
@@ -54,7 +59,7 @@
          bannerPack: (DMPack*)bannerPack
      buttonsEnabled: (BOOL)buttonsEnabled
    shouldRenderLock: (BOOL)shouldRenderLock
-{
+{ i = 0;
     self = [super initWithFrame: frame];
     
     if ( self ) {
@@ -73,7 +78,7 @@
         }
         self.greenBar = [[UIImageView alloc] initWithImage: [UIImage imageNamed: lineName]];
         self.greenBar.center = CGPointMake(0.5 * self.bounds.size.width, 0.5 * self.greenBar.bounds.size.height);
-        [self addSubview: self.greenBar];
+    //    [self addSubview: self.greenBar];
         
         // PACK NAME text
         NSString * language = [[NSLocale preferredLanguages] objectAtIndex:0];
@@ -95,7 +100,7 @@
             packNameLabel.backgroundColor = [UIColor clearColor];
             packNameLabel.textAlignment = UITextAlignmentCenter;
             packNameLabel.center = CGPointMake(0.5 * self.greenBar.bounds.size.width , 0.5 * self.greenBar.bounds.size.height);
-            [self.greenBar addSubview: packNameLabel];
+           // [self.greenBar addSubview: packNameLabel];
             
         }
         else {
@@ -120,7 +125,7 @@
         
             packNameLabel.text = [NSLocalizedString(pack.name,@"") uppercaseString];
             packNameLabel.kerning = 1.0;
-            [self.greenBar addSubview: packNameLabel];
+           // [self.greenBar addSubview: packNameLabel];
         }
         
         
@@ -137,6 +142,9 @@
 
 - (void)renderStaches
 {
+    defs  = [[NSUserDefaults alloc] init];
+    //[defs synchronize];
+    
     NSMutableArray *buttonsArray = [[NSMutableArray alloc] init];
     for ( DMStache *stache in self.pack.staches ) {
         [buttonsArray addObject: [[MustacheHighlightedButton alloc] initWitStache: stache fromPack: self.pack]];
@@ -147,40 +155,62 @@
         return;
     }
     
-    int buttonsInRow = 3;
+    int buttonsInRow = 6;
     int rowsCount = [buttonsArray count] / buttonsInRow;
     rowsCount = (0 == rowsCount ? 1 : rowsCount);    
 
     MustacheHighlightedButton *lastButton = [buttonsArray objectAtIndex: [buttonsArray count] - 1];
     for ( int row = 0; row < rowsCount; row++ ) {
-        for ( int column = 0; column < buttonsInRow; column++ ) {
-            if ( [buttonsArray count] <= row + column ) {
+        for ( int column = 0; column <= [buttonsArray count]; column++ ) {
+            if ( [buttonsArray count] <= column ) {
                 break;
             }
             
-            MustacheHighlightedButton *highButton= [buttonsArray objectAtIndex: buttonsInRow * row + column];
+            MustacheHighlightedButton *highButton= [buttonsArray objectAtIndex:  column];
             
             CGRect newFrame = highButton.frame;
-            newFrame.origin = CGPointMake(column * (highButton.frame.size.width + 3) + 1, // x
+            newFrame.origin = CGPointMake(column * (highButton.frame.size.width + 3) , // x
                                           [GUIHelper getBottomYForView: self.greenBar] + 2 // Y
                                           + row * (3 + highButton.frame.size.height));
             highButton.frame = newFrame;
             
+            /*[highButton.button addTarget: self.mustacheCurtainView
+                                  action: @selector(closeWithObject:)
+                        forControlEvents: UIControlEventTouchUpInside];
+            */
             [highButton.button addTarget: self.mustacheCurtainView
                                   action: @selector(closeWithObject:)
                         forControlEvents: UIControlEventTouchUpInside];
-            
+            highButton.tag = ++i;
             [self addSubview: highButton];
             
-            if ( self.shouldRenderLock ) {
+            NSString * valueForAppPurchase  = [[NSString alloc]initWithFormat:@"%@",highButton.stache ];
+            
+            
+           // if(highButton.tag==1 || )
+            
+            NSLog(@"valueForAppPurchasePack==%@",valueForAppPurchase);
+            NSLog(@"[defs integerForKey:valueForAppPurchase]==%ld",(long)[defs integerForKey:valueForAppPurchase]);
+            
+            if ( /*self.shouldRenderLock*/column>0 && highButton.tag!=[defs integerForKey:valueForAppPurchase] && ![[defs valueForKey:@"buyAll"] isEqualToString:@"buyAll"]) {
                 //Sun - ipad support
                 NSString *lockName = @"lockbrown.png";
                 if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
                     lockName = @"lockbrown-ipad.png";
                 }
                 UIImageView *lockImage = [[UIImageView alloc] initWithFrame: newFrame];
+               // lockImage.layer.borderWidth  = 3;
                 lockImage.image = [UIImage imageNamed: lockName];
-                [self addSubview: lockImage];
+                
+                NSLog(@"self.frame==%f",self.frame.size.width);
+                 UIView *overlayView = [[UIView alloc] initWithFrame: /*CGRectMake(70, 20, highButton.frame.size.width, 80)*/newFrame];
+                 UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget: self action: @selector(handleLockedTap:)];
+                 [overlayView addGestureRecognizer: tapGesture];
+                //lock///////////
+                    [self addSubview: lockImage];
+                   // [self addSubview: overlayView];
+                              ////////////////
+              //  overlayView.layer.borderWidth = 3;
             }
         }
     }
@@ -195,7 +225,7 @@
             [overlayView addGestureRecognizer: tapGesture];
         }
         
-        [self addSubview: overlayView];
+       // [self addSubview: overlayView];
     }
 }
 
@@ -247,7 +277,7 @@
 
 - (void)bannerPressed: (id)sender
 {
-    debug(@"banner pressed");
+    debug(@"banner pressed01");
     [self.mustacheCurtainView bannerPressed: self];
 }
 

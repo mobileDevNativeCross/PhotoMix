@@ -9,7 +9,7 @@
 
 #import <UIKit/UIImagePickerController.h>
 #import <MobileCoreServices/UTCoreTypes.h>
-
+#import "InfoVCViewController.h"
 #import "AppDelegate.h"
 #import "StartPageViewController.h"
 #import "PictureViewController.h"
@@ -18,7 +18,7 @@
 #import "FacebookManager.h"
 #import "ASIHTTPRequest.h"
 
-#import "iRate.h"
+//#import "iRate.h"
 
 #import "Flurry.h"
 
@@ -37,6 +37,7 @@ static NSTimeInterval kTimerTimeout = 7.0;
     UIButton *tvc;
     UIButton *takepicture;
     UIButton *usePhoto;
+    UIImageView *helpV;
 }
 
 @property (strong, nonatomic) UIButton *infoButton;
@@ -409,7 +410,7 @@ static NSTimeInterval kTimerTimeout = 7.0;
     }
     
 #endif
-    [self openImagePickerWithSourceType: UIImagePickerControllerSourceTypeCamera];
+ //   [self openImagePickerWithSourceType: UIImagePickerControllerSourceTypeCamera];
    
    
 
@@ -420,6 +421,7 @@ static NSTimeInterval kTimerTimeout = 7.0;
     [usePhoto addTarget:self action:@selector(usePhoto:) forControlEvents:UIControlEventTouchUpInside];
     // [picker.view addSubview:usePhoto];
     //  usePhoto.hidden = YES;
+  
     
 }
 -(void)usePhoto:(id)sender{
@@ -462,6 +464,7 @@ static NSTimeInterval kTimerTimeout = 7.0;
     
     //[self.notificationView test];
     [self.notificationView refresh];
+    [self openImagePickerWithSourceType: UIImagePickerControllerSourceTypeCamera];
 }
 
 
@@ -637,7 +640,7 @@ static NSTimeInterval kTimerTimeout = 7.0;
 
 - (void)takePicture: (id)sender
 {
-    [Flurry logEvent: @"TakeImage"];
+   // [Flurry logEvent: @"TakeImage"];
     
     [self openImagePickerWithSourceType: UIImagePickerControllerSourceTypeCamera];
     
@@ -659,18 +662,18 @@ static NSTimeInterval kTimerTimeout = 7.0;
     
     picker.delegate = self;
     picker.sourceType = sourceType;
-    picker.showsCameraControls = YES;
+    picker.showsCameraControls = NO;
+    
+    CGFloat camScaleup = 1.5;
+    picker.cameraViewTransform = CGAffineTransformScale(picker.cameraViewTransform, camScaleup, camScaleup);
+
+    
     t = [[UIButton alloc]initWithFrame:CGRectMake(0, 498, 320, 70)];
     
     [t setBackgroundColor:[UIColor blackColor]];
     
     tvc = [[UIButton alloc]initWithFrame:CGRectMake(0, 498, 320, 70)];
-    
-  //  [tvc setBackgroundColor:[UIColor greenColor]];
-    // [tvc bringSubviewToFront:picker.view];
-    
-    //customizing
-    // [t addSubview:tvc];
+  
     self.isCameraShown = YES;
     
     
@@ -700,15 +703,12 @@ static NSTimeInterval kTimerTimeout = 7.0;
         UIButton *import = [UIButton buttonWithType:UIButtonTypeCustom];
         
         
-        import.frame = CGRectMake(0 ,0,90,170);
+        import.frame = CGRectMake(0 ,-0,90,170);
         [import setTitle:@"import" forState:UIControlStateNormal];
-        [import setTitleEdgeInsets:UIEdgeInsetsMake(20.0f, -60.0f, 0.0f, 0.0f)];
+        [import setTitleEdgeInsets:UIEdgeInsetsMake(0.0f, -60.0f, 0.0f, 0.0f)];
         import.titleLabel.font = [UIFont fontWithName:@"Helvetica-Light" size:22.0];
         [import addTarget:self action:@selector(showLibrary:) forControlEvents:UIControlEventTouchUpInside];
         UIBarButtonItem* button = [[UIBarButtonItem alloc] initWithCustomView:import];
-        
-        // [[UIBarButtonItem alloc] initWithTitle:@"import" style:UIBarButtonItemStylePlain target:self action:@selector(showLibrary:)];
-        
         
         viewController.navigationItem.leftBarButtonItems = [NSArray arrayWithObject:button];
         viewController.navigationItem.title = @"";
@@ -717,31 +717,23 @@ static NSTimeInterval kTimerTimeout = 7.0;
         viewController.navigationController.navigationBar.barTintColor = [UIColor clearColor];
         viewController.navigationController.navigationBar.translucent = NO;
         
-        
-        
-        
         UIButton *buttonc = [UIButton buttonWithType:UIButtonTypeCustom];
-        UIImageView *helpV = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"help_new.png"]];
-        helpV.frame = CGRectMake(270 ,15,35,35);
-        
+        helpV = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"help_new.png"]];
+        helpV.frame = CGRectMake(270 ,3,35,35);
        
-        
-        
-       // [buttonc setImage:[UIImage imageNamed:@"help_new.png"] forState:UIControlStateNormal];
         [buttonc addTarget:self action:@selector(help:) forControlEvents:UIControlEventTouchUpInside]; //adding action
         
         buttonc.frame = CGRectMake(0 ,20,120,90);
-        buttonc.layer.borderWidth = 3;
-       // buttonc.layer.borderColor = [UIColor greenColor].CGColor;
-       // [buttonc setTitleEdgeInsets:UIEdgeInsetsMake(20.0f, -50.0f, 0.0f, 0.0f)];
-        UIBarButtonItem* help = [[UIBarButtonItem alloc] initWithCustomView:buttonc];
+              UIBarButtonItem* help = [[UIBarButtonItem alloc] initWithCustomView:buttonc];
         viewController.navigationItem.rightBarButtonItems = [NSArray arrayWithObject:help];
+        
         [picker.view addSubview:helpV];
        
-//       [t  sendSubviewToBack:self.view];
+
         [self AddView];
     }
 }
+
 -(void)AddView
 {
     toggleCamera = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -780,6 +772,10 @@ static NSTimeInterval kTimerTimeout = 7.0;
 }
 -(void)help:(id)sender{
     NSLog(@"HELP");
+     [picker dismissModalViewControllerAnimated:YES];
+    InfoViewController *t2 = [[InfoViewController alloc] init];
+    
+     [self.navigationController pushViewController: t2 animated: NO];
 }
 
 - (BOOL)prefersStatusBarHidden
@@ -794,6 +790,7 @@ static NSTimeInterval kTimerTimeout = 7.0;
 }
 
 - (void) showLibrary: (id) sender {
+    helpV.hidden  = YES;
     takepicture.hidden = YES;
     toggleCamera.hidden  = YES;
     self.navigationController.navigationBar.barTintColor = [UIColor clearColor];

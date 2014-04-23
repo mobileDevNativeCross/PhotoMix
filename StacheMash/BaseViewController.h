@@ -29,6 +29,9 @@
 
 #pragma mark Button toolbar
 - (void)createBottomToolbarWithButtons: (NSArray*)buttonsArray;
+- (void)createBottomToolbar: (NSArray*)buttonsArray;
+- (void)createBottomToolbar1: (NSArray*)buttonsArray;
+- (void)createBottomToolbarPurchase: (NSArray*)buttonsArray;
 - (void)updateBottomToolbarToInterfaceOrientation: (UIInterfaceOrientation)interfaceOrientation;
 
 - (UIButton*)plainButtonWithImageNamed: (NSString*)imageName pressedImageName: (NSString*)pressedImageName target: (id)target action: (SEL)action;

@@ -24,7 +24,7 @@
 "Share by email with glob.ly link %@" = "Check out my latest Mustache Bash masterpiece...\n\n Download it now from the App Store - %@\n\n Check out the Facebook page - http://www.facebook.com/MustacheBashAppPage\n\n Follow on Twitter - https://twitter.com/brightnewt";
 
 /* Default twitter text for mustached picture sharing */
-"Check out my mustache! via @mustachebashapp" = "Check out my mustache! via @mustachebashapp";
+"Check out my mustache! via @mustachebashapp" = "Сделано с помощью @photomix";
 
 /* Info screen - share app via twitter - tweet text */
 "Check out this hilarious app @mustachebashapp!" = "Check out this hilarious app right now... @mustachebashapp!";
@@ -224,10 +224,10 @@
 "Your Facebook session has expired." = "Your Facebook session has expired.";
 
 /* Facebook alert notification text */
-"Your picture was posted successfully." = "Stachebashed! Your picture was posted successfully.";
+"Your picture was posted successfully." = "PhotoMix! Your picture was posted successfully.";
 
 /* Successful Save to photo album - alert text */
-"Your picture was saved successfully." = "Stachebashed! Your picture was saved successfully.";
+"Your picture was saved successfully." = "PhotoMix! Your picture was saved successfully.";
 
 /* Info screen - SMS body text */
 "Share app by sms with glob.ly link %@" = "Download this app right now. It's hilarious...you can put a mustache on anything %@";
